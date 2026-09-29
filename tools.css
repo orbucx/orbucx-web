@@ -1,0 +1,325 @@
+/* ============ Orbucx — tools.css (DevOps Tools page) ============ */
+
+.tools-hero { padding: calc(var(--s12) + 72px) 0 var(--s6); }
+.tools-hero .hero-sub { margin-bottom: 0; }
+
+/* ============ Layout ============ */
+.tools-layout {
+  display: grid;
+  grid-template-columns: 264px 1fr;
+  gap: var(--s4);
+  align-items: start;
+  padding-top: var(--s5);
+  padding-bottom: var(--s12);
+}
+
+/* ============ Sidebar ============ */
+.tools-sidebar { position: sticky; top: 96px; }
+.tool-nav { display: flex; flex-direction: column; gap: 2px; }
+.tool-cat {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--teal); margin: var(--s3) 0 var(--s1); padding-left: 14px;
+}
+.tool-cat:first-child { margin-top: 0; }
+.tool-tab {
+  display: block; width: 100%; text-align: left;
+  background: transparent; border: 1px solid transparent; border-radius: 10px;
+  padding: 10px 14px; cursor: pointer;
+  color: var(--muted); font-family: var(--font-body); font-size: 0.92rem; font-weight: 500;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.tool-tab:hover { color: var(--text); background: rgba(148, 163, 184, 0.07); }
+.tool-tab[aria-selected="true"] {
+  color: var(--text);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(20, 184, 166, 0.12));
+  border-color: rgba(20, 184, 166, 0.35);
+}
+
+/* ============ Tool panel ============ */
+.tool-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--s4);
+  min-width: 0; /* allow code blocks to shrink/scroll */
+}
+.tool-header h2 { color: var(--text); font-size: clamp(1.3rem, 1.1rem + 0.8vw, 1.7rem); margin-bottom: var(--s1); }
+.tool-header p { font-size: 0.95rem; margin-bottom: var(--s3); }
+
+/* ============ Form ============ */
+.tool-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--s2) var(--s3);
+  margin-bottom: var(--s3);
+  padding: var(--s3);
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.tool-form .field-full { grid-column: 1 / -1; }
+.tool-form label { font-size: 0.85rem; font-weight: 500; color: var(--text); }
+.tool-form .field { display: grid; gap: 6px; align-content: start; }
+.tool-form input[type="text"],
+.tool-form input[type="number"],
+.tool-form select {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 11px 14px; color: var(--text); font-family: var(--font-body); font-size: 0.92rem;
+  transition: border-color 0.2s ease; width: 100%;
+}
+.tool-form input:hover, .tool-form select:hover { border-color: rgba(148, 163, 184, 0.35); }
+.tool-form input.invalid { border-color: rgba(239, 68, 68, 0.7); }
+.tool-form input::placeholder { color: rgba(148, 163, 184, 0.5); }
+.tool-form select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2314b8a6' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* Toggle (checkbox) rows */
+.toggle-field {
+  display: flex; align-items: center; gap: 10px;
+  padding-top: 22px; /* aligns with inputs that have labels above */
+}
+.toggle-field.no-offset { padding-top: 0; }
+.toggle-field input[type="checkbox"] {
+  appearance: none; width: 38px; height: 22px; border-radius: 999px;
+  background: rgba(148, 163, 184, 0.25); position: relative; cursor: pointer; flex: 0 0 auto;
+  transition: background 0.2s ease;
+}
+.toggle-field input[type="checkbox"]::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+  border-radius: 50%; background: #fff; transition: transform 0.2s ease;
+}
+.toggle-field input[type="checkbox"]:checked { background: var(--grad); }
+.toggle-field input[type="checkbox"]:checked::after { transform: translateX(16px); }
+.toggle-field label { cursor: pointer; }
+
+.field-hint { font-size: 0.75rem; color: rgba(148, 163, 184, 0.65); }
+
+/* ============ Output ============ */
+.tool-output { display: grid; gap: var(--s2); }
+.output-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s2); flex-wrap: wrap;
+}
+.output-filename {
+  font-family: "SFMono-Regular", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 0.82rem; color: var(--teal);
+}
+.output-actions { display: flex; gap: var(--s1); }
+.btn-tool {
+  font-family: var(--font-head); font-weight: 600; font-size: 0.82rem;
+  padding: 9px 18px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: transparent; color: var(--text);
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.btn-tool:hover { border-color: var(--teal); color: var(--teal); transform: translateY(-1px); }
+.btn-tool.copied {
+  border-color: var(--teal);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(20, 184, 166, 0.18));
+  color: var(--teal);
+}
+
+.code-block {
+  background: #070b14;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: var(--s3);
+  overflow-x: auto;
+  max-height: 560px;
+  overflow-y: auto;
+}
+.code-block pre {
+  margin: 0;
+  font-family: "SFMono-Regular", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 0.82rem; line-height: 1.6;
+  color: #c9d4e6; white-space: pre; tab-size: 2;
+}
+/* Syntax-highlight-ish tokens */
+.code-block .tok-comment { color: #5b6b85; font-style: italic; }
+.code-block .tok-str { color: #7ee2c7; }
+.code-block .tok-kw { color: #6ea8ff; font-weight: 600; }
+.code-block .tok-var { color: #f0b866; }
+
+.safety-note {
+  font-size: 0.85rem; color: var(--muted);
+  padding: 10px 14px; border-radius: 10px;
+  background: rgba(20, 184, 166, 0.07);
+  border: 1px solid rgba(20, 184, 166, 0.25);
+}
+
+/* CTA strip under output */
+.output-cta {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s2); flex-wrap: wrap;
+  padding: 12px 16px; border-radius: 10px;
+  background: linear-gradient(100deg, rgba(37, 99, 235, 0.1), rgba(20, 184, 166, 0.08));
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  font-size: 0.88rem; color: var(--muted);
+}
+.output-cta a { font-weight: 600; font-family: var(--font-head); white-space: nowrap; }
+.output-cta a:hover { color: var(--text); }
+
+/* ============ EC2 tool: mode pills, command list, setup cards ============ */
+.mode-switch { display: flex; gap: var(--s1); margin-bottom: var(--s3); }
+.mode-pill {
+  font-family: var(--font-head); font-weight: 600; font-size: 0.88rem;
+  padding: 10px 22px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: transparent; color: var(--muted);
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.mode-pill:hover { color: var(--text); border-color: var(--teal); }
+.mode-pill[aria-selected="true"] {
+  color: var(--text);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(20, 184, 166, 0.2));
+  border-color: rgba(20, 184, 166, 0.5);
+}
+.ec2-mode-title { color: var(--text); font-size: 1.15rem; margin-bottom: 6px; }
+.ec2-mode-sub { font-size: 0.92rem; color: var(--muted); margin-bottom: var(--s3); }
+
+.cmd-group { margin-bottom: var(--s3); }
+.cmd-group-title { color: var(--text); font-size: 0.98rem; font-weight: 700; margin-bottom: 8px; }
+.cmd-row {
+  display: flex; align-items: center; gap: 10px;
+  background: #070b14; border: 1px solid var(--border); border-radius: 10px;
+  padding: 8px 12px; margin-bottom: 6px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.cmd-copy {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.3); background: transparent; color: var(--muted);
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  position: sticky; left: 0;
+}
+.cmd-copy:hover { color: var(--teal); border-color: var(--teal); }
+.cmd-copy.copied {
+  color: var(--teal); border-color: var(--teal);
+  background: rgba(20, 184, 166, 0.12); font-weight: 700;
+}
+.cmd-text {
+  font-family: "SFMono-Regular", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 0.82rem; color: #c9d4e6; white-space: nowrap;
+}
+.cmd-body { display: grid; gap: 3px; min-width: 0; }
+.cmd-desc { font-size: 0.78rem; color: rgba(148, 163, 184, 0.7); white-space: nowrap; }
+
+.ec2-select-label { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: var(--s2); }
+.setup-cards { display: grid; gap: 10px; margin-bottom: var(--s3); }
+.setup-card {
+  display: flex; align-items: flex-start; gap: 12px; cursor: pointer;
+  background: var(--bg-alt); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; transition: border-color 0.2s ease, background 0.2s ease;
+}
+.setup-card:hover { border-color: rgba(20, 184, 166, 0.4); }
+.setup-card:has(input:checked) {
+  border-color: rgba(20, 184, 166, 0.55);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(20, 184, 166, 0.08));
+}
+.setup-card input[type="radio"] {
+  appearance: none; flex: 0 0 auto; width: 18px; height: 18px; margin-top: 2px;
+  border-radius: 50%; border: 2px solid rgba(148, 163, 184, 0.5); cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.setup-card input[type="radio"]:checked {
+  border-color: var(--teal);
+  box-shadow: inset 0 0 0 4px var(--teal);
+}
+.setup-card-body { display: grid; gap: 3px; min-width: 0; }
+.setup-card-body strong { color: var(--text); font-size: 0.95rem; }
+.setup-card-body span { color: var(--muted); font-size: 0.85rem; }
+
+.btn-generate {
+  display: block; width: 100%; margin-bottom: var(--s3);
+  font-family: var(--font-head); font-weight: 700; font-size: 0.95rem;
+  padding: 13px 20px; border-radius: 12px; cursor: pointer; border: none;
+  background: linear-gradient(135deg, #2563eb, #14b8a6); color: #fff;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.btn-generate:hover { transform: translateY(-1px); filter: brightness(1.08); }
+
+.ec2-mode + .safety-note, #ec2-script .tool-output { margin-top: var(--s1); }
+.tool-panel .safety-note { margin-bottom: var(--s2); }
+
+/* ============ CI/CD tool: sub pills, info box, env vars ============ */
+.sub-switch { display: flex; gap: 8px; margin-bottom: var(--s3); }
+.sub-pill {
+  font-family: var(--font-head); font-weight: 600; font-size: 0.8rem;
+  padding: 7px 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: transparent; color: var(--muted);
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.sub-pill:hover { color: var(--text); border-color: var(--teal); }
+.sub-pill[aria-selected="true"] {
+  color: var(--text);
+  background: rgba(20, 184, 166, 0.14);
+  border-color: rgba(20, 184, 166, 0.5);
+}
+
+.cicd-info {
+  background: linear-gradient(100deg, rgba(37, 99, 235, 0.1), rgba(20, 184, 166, 0.07));
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: 12px; padding: 14px 18px; margin-bottom: var(--s3);
+  font-size: 0.88rem; color: var(--muted);
+}
+.cicd-info strong { display: block; color: var(--text); margin-bottom: 6px; }
+.cicd-info ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.cicd-info ul { margin: 4px 0; padding-left: 18px; }
+.cicd-info code {
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.82em; color: var(--teal);
+  background: rgba(20, 184, 166, 0.08); padding: 1px 5px; border-radius: 5px;
+}
+
+.env-paste { display: grid; gap: 6px; margin-bottom: var(--s3); }
+.env-paste label { font-size: 0.85rem; font-weight: 500; color: var(--text); }
+.env-paste textarea {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 11px 14px; color: var(--text); width: 100%; resize: vertical;
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.85rem; line-height: 1.5; min-height: 96px;
+  transition: border-color 0.2s ease;
+}
+.env-paste textarea:hover { border-color: rgba(148, 163, 184, 0.35); }
+.env-paste textarea::placeholder { color: rgba(148, 163, 184, 0.5); }
+
+.env-list-section { margin-bottom: var(--s3); }
+.env-list-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s2); margin-bottom: 8px;
+}
+.env-list-title { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.env-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.env-row input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 9px 13px; color: var(--text);
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace; font-size: 0.85rem;
+}
+.env-row input::placeholder { color: rgba(148, 163, 184, 0.45); }
+.env-remove {
+  flex: 0 0 auto; width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(148, 163, 184, 0.3); background: transparent; color: var(--muted);
+  font-size: 1rem; line-height: 1;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.env-remove:hover { color: #ef4444; border-color: rgba(239, 68, 68, 0.6); }
+
+#cicdOutput { margin-bottom: var(--s2); }
+
+/* ============ Responsive: sidebar → chips ============ */
+@media (max-width: 900px) {
+  .tools-layout { grid-template-columns: 1fr; gap: var(--s3); }
+  .tools-sidebar { position: static; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 calc(-1 * var(--s3)); padding: 0 var(--s3); }
+  .tool-nav { flex-direction: row; align-items: center; gap: var(--s1); width: max-content; padding-bottom: var(--s1); }
+  .tool-cat { margin: 0 var(--s1) 0 var(--s2); padding-left: 0; white-space: nowrap; }
+  .tool-cat:first-child { margin-left: 0; }
+  .tool-tab { white-space: nowrap; width: auto; border-color: var(--border); background: var(--surface); padding: 9px 16px; }
+}
+@media (max-width: 520px) {
+  .tool-panel { padding: var(--s3); }
+  .tool-form { grid-template-columns: 1fr; padding: var(--s2); }
+  .output-bar { flex-direction: column; align-items: flex-start; }
+}
