@@ -569,43 +569,52 @@
     var branch = cleanText(v.branch, "main");
     var runner = cleanText(v.runner, "my-runner");
     var dir    = String(v.dir || "").trim().replace(/["'`;$\\]/g, "");
-    var startCmd = pm === "yarn" ? "pm2 start yarn --name \"" + proc + "\" -- start"
-                 : pm === "pnpm" ? "pm2 start pnpm --name \"" + proc + "\" -- start"
-                 : "pm2 start npm --name \"" + proc + "\" -- start";
+    var installCmd = pm === "yarn" ? "yarn install --legacy-peer-deps"
+                   : pm === "pnpm" ? "pnpm install"
+                   : "npm install --legacy-peer-deps";
+    var startCmd = pm === "yarn" ? "pm2 start \"yarn start\" --name \"$PM2_PROCESS_NAME\""
+                 : pm === "pnpm" ? "pm2 start \"pnpm start\" --name \"$PM2_PROCESS_NAME\""
+                 : "pm2 start \"npm start\" --name \"$PM2_PROCESS_NAME\"";
     var L = CICD_HEADER.concat([
-      "name: Deploy " + proc + " (" + branch + ")",
+      "name: Deploying " + branch + " Branch",
       "",
       "on:",
       "  push:",
-      "    branches: [" + branch + "]",
+      "    branches:",
+      "      - " + branch,
       "",
       "jobs:",
       "  deploy:",
-      "    runs-on: [self-hosted, " + runner + "]"
-    ]);
-    if (dir) {
-      L = L.concat([
-        "    defaults:",
-        "      run:",
-        "        working-directory: " + dir
-      ]);
-    }
-    L = L.concat([
-      "    steps:",
-      "      - uses: actions/checkout@v4",
+      "    runs-on: [self-hosted, " + runner + "]",
       "",
-      "      - uses: actions/setup-node@v4",
+      "    env:",
+      "      PM2_PROCESS_NAME: " + proc,
+      "      NODE_VERSION: " + node,
+      "",
+      "    steps:",
+      "      - name: Checkout code",
+      "        uses: actions/checkout@v4",
       "        with:",
-      "          node-version: " + node,
+      "          clean: false" + (dir ? "\n          path: " + dir : ""),
+      "",
+      "      - name: Setup Node.js",
+      "        uses: actions/setup-node@v4",
+      "        with:",
+      "          node-version: ${{ env.NODE_VERSION }}",
       "",
       "      - name: Install dependencies",
-      "        run: " + cicdInstall(pm),
+      "        run: " + installCmd + (dir ? "\n        working-directory: " + dir : ""),
       "",
-      "      - name: Build (if present)",
-      "        run: " + cicdBuild(pm),
-      "",
-      "      - name: Deploy with PM2",
-      "        run: pm2 restart " + proc + " || " + startCmd
+      "      - name: Start or Reload the Application",
+      "        run: |",
+      "          if pm2 list | grep -q \"$PM2_PROCESS_NAME\"; then",
+      "            echo \"Process $PM2_PROCESS_NAME exists. Reloading...\"",
+      "            pm2 reload \"$PM2_PROCESS_NAME\"",
+      "          else",
+      "            echo \"Process $PM2_PROCESS_NAME does not exist. Starting...\"",
+      "            " + startCmd,
+      "          fi",
+      "          pm2 save" + (dir ? "\n        working-directory: " + dir : "")
     ]);
     return L.join("\n") + "\n";
   }
