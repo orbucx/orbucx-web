@@ -1921,7 +1921,7 @@
       '<form class="tool-form" id="toolForm">' + tool.fields.map(function (f) { return fieldHtml(tool, f); }).join("") + '</form>' +
       '<button type="button" class="btn-generate" id="generateBtn">Generate ' + esc(tool.name) + ' Script</button>' +
       '<div class="tool-output" id="toolOutput">' +
-        '  <div class="output-bar"><span class="output-filename"></span>' +
+        '  <div class="output-bar"><span class="output-filename">' + (tool.filename ? tool.filename({}) : 'script.sh') + '</span>' +
         '    <div class="output-actions"><button type="button" class="btn-tool" id="copyBtn">Copy</button>' +
         '      <button type="button" class="btn-tool" id="downloadBtn">Download</button></div></div>' +
         '  <div class="code-block"><pre></pre></div>' +
