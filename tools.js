@@ -1961,7 +1961,6 @@
       setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 200);
     });
 
-    regenerate(tool);
     if (pushHash) history.replaceState(null, "", "#" + tool.id);
   }
 
