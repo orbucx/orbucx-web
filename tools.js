@@ -1918,8 +1918,8 @@
 
     panelEl.innerHTML =
       '<div class="tool-header"><h2>' + esc(tool.name) + "</h2><p>" + esc(tool.desc) + "</p></div>" +
-      '<form class="tool-form" id="toolForm">' + tool.fields.map(function (f) { return fieldHtml(tool, f); }).join("") + 
-      '<button type="button" class="btn btn-primary" id="generateBtn" style="margin-top:1rem;">Generate ' + esc(tool.name) + ' Script</button></form>' +
+      '<form class="tool-form" id="toolForm">' + tool.fields.map(function (f) { return fieldHtml(tool, f); }).join("") + '</form>' +
+      '<button type="button" class="btn-generate" id="generateBtn">Generate ' + esc(tool.name) + ' Script</button>' +
       '<div class="tool-output" id="toolOutput" style="display:none;">' +
         '  <div class="output-bar"><span class="output-filename"></span>' +
         '    <div class="output-actions"><button type="button" class="btn-tool" id="copyBtn">Copy</button>' +
