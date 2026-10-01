@@ -1547,14 +1547,14 @@
 
     var TARBALL = "", CHECKSUM = "";
     if (arch === "x64") {
-      TARBALL = "actions-runner-linux-x64-2.326.0.tar.gz";
-      CHECKSUM = "9c74af9b4352bbc99aecc7353b47bcdfcd1b2a0f6d15af54a99f54a0c14a1de8";
+      TARBALL = "actions-runner-linux-x64-2.337.0.tar.gz";
+      CHECKSUM = "70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613";
     } else if (arch === "arm") {
-      TARBALL = "actions-runner-linux-arm-2.326.0.tar.gz";
-      CHECKSUM = "e71a8e88b0ad4d05e315a42de9aef13ed3eb7a8ac37f4693cbeaba4ac353ff30";
+      TARBALL = "actions-runner-linux-arm-2.337.0.tar.gz";
+      CHECKSUM = "3ea05289b7f7e1bc9a7bb35e2f738a903e0f757cb27ed32a3ef701404cf6d8e8";
     } else { // arm64
-      TARBALL = "actions-runner-linux-arm64-2.326.0.tar.gz";
-      CHECKSUM = "ee7c229c979c5152e9f12be16ee9e83ff74c9d9b95c3c1aeb2e9b6d07157ec85";
+      TARBALL = "actions-runner-linux-arm64-2.337.0.tar.gz";
+      CHECKSUM = "9b1dc70626422526e3c94767cf024896beb15da5342a3f4819bf2feac13e0393";
     }
 
     var L = [
@@ -1591,14 +1591,14 @@
       'CHECKSUM=""',
       "",
       'if [[ "$ARCHITECTURE" == "x64" ]]; then',
-      ' TARBALL="actions-runner-linux-x64-2.326.0.tar.gz"',
-      ' CHECKSUM="9c74af9b4352bbc99aecc7353b47bcdfcd1b2a0f6d15af54a99f54a0c14a1de8"',
+      ' TARBALL="actions-runner-linux-x64-2.337.0.tar.gz"',
+      ' CHECKSUM="70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613"',
       'elif [[ "$ARCHITECTURE" == "arm" ]]; then',
-      ' TARBALL="actions-runner-linux-arm-2.326.0.tar.gz"',
-      ' CHECKSUM="e71a8e88b0ad4d05e315a42de9aef13ed3eb7a8ac37f4693cbeaba4ac353ff30"',
+      ' TARBALL="actions-runner-linux-arm-2.337.0.tar.gz"',
+      ' CHECKSUM="3ea05289b7f7e1bc9a7bb35e2f738a903e0f757cb27ed32a3ef701404cf6d8e8"',
       'elif [[ "$ARCHITECTURE" == "arm64" ]]; then',
-      ' TARBALL="actions-runner-linux-arm64-2.326.0.tar.gz"',
-      ' CHECKSUM="ee7c229c979c5152e9f12be16ee9e83ff74c9d9b95c3c1aeb2e9b6d07157ec85"',
+      ' TARBALL="actions-runner-linux-arm64-2.337.0.tar.gz"',
+      ' CHECKSUM="9b1dc70626422526e3c94767cf024896beb15da5342a3f4819bf2feac13e0393"',
       "else",
       ' echo "❌ Unsupported architecture: $ARCHITECTURE"',
       " exit 1",
@@ -1606,7 +1606,7 @@
       "",
       "# ─── Download and Extract Runner ─────────────────────────────────────────────",
       'STEP="Downloading runner tarball"',
-      'curl -o "$TARBALL" -L "https://github.com/actions/runner/releases/download/v2.326.0/${TARBALL}"',
+      'curl -o "$TARBALL" -L "https://github.com/actions/runner/releases/download/v2.337.0/${TARBALL}"',
       'echo "✔️ Downloaded $TARBALL"',
       "",
       'STEP="Verifying checksum"',
