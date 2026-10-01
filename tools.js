@@ -1920,7 +1920,7 @@
       '<div class="tool-header"><h2>' + esc(tool.name) + "</h2><p>" + esc(tool.desc) + "</p></div>" +
       '<form class="tool-form" id="toolForm">' + tool.fields.map(function (f) { return fieldHtml(tool, f); }).join("") + '</form>' +
       '<button type="button" class="btn-generate" id="generateBtn">Generate ' + esc(tool.name) + ' Script</button>' +
-      '<div class="tool-output" id="toolOutput" style="display:none;">' +
+      '<div class="tool-output" id="toolOutput">' +
         '  <div class="output-bar"><span class="output-filename"></span>' +
         '    <div class="output-actions"><button type="button" class="btn-tool" id="copyBtn">Copy</button>' +
         '      <button type="button" class="btn-tool" id="downloadBtn">Download</button></div></div>' +
@@ -1932,7 +1932,6 @@
     var form = document.getElementById("toolForm");
     document.getElementById("generateBtn").addEventListener("click", function () {
       regenerate(tool);
-      document.getElementById("toolOutput").style.display = "block";
     });
 
     document.getElementById("copyBtn").addEventListener("click", function () {
