@@ -1918,8 +1918,9 @@
 
     panelEl.innerHTML =
       '<div class="tool-header"><h2>' + esc(tool.name) + "</h2><p>" + esc(tool.desc) + "</p></div>" +
-      '<form class="tool-form" id="toolForm">' + tool.fields.map(function (f) { return fieldHtml(tool, f); }).join("") + "</form>" +
-      '<div class="tool-output">' +
+      '<form class="tool-form" id="toolForm">' + tool.fields.map(function (f) { return fieldHtml(tool, f); }).join("") + 
+      '<button type="button" class="btn btn-primary" id="generateBtn" style="margin-top:1rem;">Generate ' + esc(tool.name) + ' Script</button></form>' +
+      '<div class="tool-output" id="toolOutput" style="display:none;">' +
         '  <div class="output-bar"><span class="output-filename"></span>' +
         '    <div class="output-actions"><button type="button" class="btn-tool" id="copyBtn">Copy</button>' +
         '      <button type="button" class="btn-tool" id="downloadBtn">Download</button></div></div>' +
@@ -1929,8 +1930,10 @@
       "</div>";
 
     var form = document.getElementById("toolForm");
-    form.addEventListener("input", function () { regenerate(tool); });
-    form.addEventListener("change", function () { regenerate(tool); });
+    document.getElementById("generateBtn").addEventListener("click", function () {
+      regenerate(tool);
+      document.getElementById("toolOutput").style.display = "block";
+    });
 
     document.getElementById("copyBtn").addEventListener("click", function () {
       var btn = this;
