@@ -436,7 +436,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 }
 
 /* ============ Footer ============ */
-.footer { padding: var(--s4) 0; }
+.footer { padding: var(--s2) 0; }
 .footer-inner {
   display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s5); flex-wrap: wrap;
   padding-bottom: var(--s5);
