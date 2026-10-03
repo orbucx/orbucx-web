@@ -383,10 +383,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 /* ============ Connect strip ============ */
 .connect-strip { padding: var(--s8) 0; border-top: 1px solid var(--border); }
 .connect-inner {
-  display: flex; align-items: center; justify-content: space-between; gap: var(--s4); flex-wrap: wrap;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s3); text-align: center;
 }
 .connect-title { color: var(--text); font-size: clamp(1.35rem, 1.1rem + 1.2vw, 1.9rem); }
-.social-links, .footer-social { display: flex; gap: var(--s2); }
+.social-links, .footer-social { display: flex; justify-content: center; gap: var(--s2); }
 .social-btn {
   width: 48px; height: 48px; display: grid; place-items: center;
   border-radius: 12px;
