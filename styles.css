@@ -246,6 +246,25 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 /* ============ Cards & grids ============ */
 .grid { display: grid; gap: var(--s3); }
+
+/* Clickable card links */
+a.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+a.card-link:hover {
+  transform: translateY(-4px);
+  border-color: var(--teal);
+  box-shadow: 0 12px 32px rgba(20, 184, 166, 0.15);
+}
+a.card-link h3 {
+  transition: color 0.2s ease;
+}
+a.card-link:hover h3 {
+  color: var(--teal);
+}
 .services-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 .audit-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 .audit-outcome {
