@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 IAM Mistakes That Expose Your Cloud (And How to Fix Them) | Orbucx Blog</title>
+<meta name="description" content="The 5 most common IAM security mistakes we find in cloud audits: over-permissive roles, forgotten keys, admin everywhere. Real examples and fixes for AWS, GCP, Azure.">
+<link rel="canonical" href="https://orbucx.com/blog/5-iam-mistakes-expose-your-cloud/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://orbucx.com/blog/5-iam-mistakes-expose-your-cloud/">
+<meta property="og:title" content="5 IAM Mistakes That Expose Your Cloud (And How to Fix Them)">
+<meta property="og:description" content="The IAM security mistakes we find in almost every audit. Over-permissive roles, forgotten keys, admin access everywhere.">
+<meta property="article:published_time" content="2025-11-20T00:00:00Z">
+<meta property="article:section" content="Security">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/images/fav32.png">
+<link rel="stylesheet" href="../styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "5 IAM Mistakes That Expose Your Cloud (And How to Fix Them)",
+  "description": "Common IAM security mistakes found in cloud audits and how to fix them.",
+  "author": {"@type": "Organization", "name": "Orbucx"},
+  "publisher": {"@type": "Organization", "name": "Orbucx"},
+  "datePublished": "2025-11-20",
+  "dateModified": "2025-11-20"
+}
+</script>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="logo-link"><img src="../assets/images/orbucx-header-logo.png" alt="Orbucx" class="nav-logo" width="140" height="40"></a>
+    <div class="nav-links">
+      <a href="../index.html#services">Services</a>
+      <a href="../tools.html">DevOps Tools</a>
+      <a href="../index.html#blog">Blog</a>
+      <a href="../index.html#contact" class="btn btn-primary btn-sm">Get Your Free Audit</a>
+    </div>
+  </div>
+</nav>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <div class="container">
+    <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">Home</span></a>
+        <meta itemprop="position" content="1">
+      </li>
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html#blog"><span itemprop="name">Blog</span></a>
+        <meta itemprop="position" content="2">
+      </li>
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <span itemprop="name">5 IAM Mistakes</span>
+        <meta itemprop="position" content="3">
+      </li>
+    </ol>
+  </div>
+</nav>
+
+<article class="blog-article">
+  <header class="blog-header">
+    <div class="container container-narrow">
+      <p class="blog-category">Security</p>
+      <h1>5 IAM Mistakes That Expose Your Cloud (And How to Fix Them)</h1>
+      <p class="blog-meta">
+        <time datetime="2025-11-20">November 20, 2025</time> · 10 min read
+      </p>
+      <p class="blog-intro">In almost every cloud security audit we do, we find the same IAM mistakes. Over-permissive roles, forgotten access keys, admin access everywhere. These aren't exotic vulnerabilities — they're basic misconfigurations that attackers exploit every day. Here are the top 5 and how to fix them.</p>
+    </div>
+  </header>
+
+  <div class="container container-narrow blog-content">
+    
+    <h2>Mistake #1: The "Full Access" Service Role</h2>
+    
+    <p><strong>What we find:</strong> Service roles with <code>*:*</code> permissions — full access to everything in the account.</p>
+    
+    <p><strong>Why it happens:</strong> An engineer needs their Lambda/EC2/container to access something. They get a permission error. Rather than figure out the exact permission needed, they attach <code>AdministratorAccess</code> and move on.</p>
+    
+    <p><strong>The risk:</strong> If that service is compromised (SSRF, RCE, supply chain attack), the attacker has full access to your AWS account. They can create new IAM users, access all data, spin up crypto miners, delete everything.</p>
+    
+    <h3>Real Example</h3>
+    <p>In a recent audit, we found a Node.js API running on ECS with this policy:</p>
+    
+    <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": "*",
+    "Resource": "*"
+  }]
+}</code></pre>
+    
+    <p>The API only needed to read from one S3 bucket and write to one DynamoDB table. Instead, it could do anything.</p>
+    
+    <h3>The Fix</h3>
+    <p>Apply least-privilege. The actual policy needed:</p>
+    
+    <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::my-bucket",
+        "arn:aws:s3:::my-bucket/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["dynamodb:PutItem", "dynamodb:GetItem"],
+      "Resource": "arn:aws:dynamodb:us-east-1:123456789:table/my-table"
+    }
+  ]
+}</code></pre>
+    
+    <p><strong>Tool tip:</strong> Use AWS IAM Access Analyzer to generate least-privilege policies based on CloudTrail activity.</p>
+
+    <h2>Mistake #2: Long-Lived Access Keys</h2>
+    
+    <p><strong>What we find:</strong> Access keys that haven't been rotated in 2+ years. Keys for users who left the company. Keys shared between multiple people.</p>
+    
+    <p><strong>Why it happens:</strong> Keys get created for CI/CD, for local development, for that one script. Nobody tracks them. Nobody rotates them.</p>
+    
+    <p><strong>The risk:</strong> Long-lived keys get leaked — in git commits, in Slack, in environment files on developer laptops. The longer they live, the more places they end up.</p>
+    
+    <h3>Real Example</h3>
+    <p>We found a company with 47 active access keys. 23 of them were over 1 year old. 8 belonged to users who no longer worked there. One key was in a public GitHub repo (they didn't know).</p>
+    
+    <h3>The Fix</h3>
+    <ol>
+      <li><strong>For CI/CD:</strong> Use IAM roles with OIDC identity providers
+        <pre><code># GitHub Actions with OIDC (no access keys!)
+- name: Configure AWS credentials
+  uses: aws-actions/configure-aws-credentials@v4
+  with:
+    role-to-assume: arn:aws:iam::123456789:role/GitHubActionsRole
+    aws-region: us-east-1</code></pre>
+      </li>
+      <li><strong>For local development:</strong> Use AWS SSO with temporary credentials</li>
+      <li><strong>If you must use keys:</strong> 90-day rotation policy, automated rotation where possible</li>
+      <li><strong>Audit:</strong> Run this regularly to find old keys:
+        <pre><code>aws iam generate-credential-report
+aws iam get-credential-report --output text --query Content | base64 -d</code></pre>
+      </li>
+    </ol>
+
+    <h2>Mistake #3: Everyone is Admin</h2>
+    
+    <p><strong>What we find:</strong> 80%+ of IAM users have admin access. Every engineer can do anything.</p>
+    
+    <p><strong>Why it happens:</strong> Startups move fast. Giving everyone admin is the path of least resistance. "We're a small team, we trust each other."</p>
+    
+    <p><strong>The risk:</strong> One compromised account (phishing, stolen laptop, credential stuffing) = full account compromise. Also: accidental damage. That junior dev who ran <code>terraform destroy</code> in the wrong account.</p>
+    
+    <h3>The Fix</h3>
+    <p>Implement role-based access with these tiers:</p>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Access Level</th>
+          <th>Who</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Admin</td>
+          <td>Full access (use sparingly)</td>
+          <td>1-2 infrastructure leads</td>
+        </tr>
+        <tr>
+          <td>Developer</td>
+          <td>Deploy apps, view resources, no IAM changes</td>
+          <td>Engineering team</td>
+        </tr>
+        <tr>
+          <td>Read-Only</td>
+          <td>View everything, change nothing</td>
+          <td>Support, new hires</td>
+        </tr>
+        <tr>
+          <td>Service-Specific</td>
+          <td>Access to specific services only</td>
+          <td>Data team (Redshift only), etc.</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <p><strong>Better yet:</strong> Use AWS SSO with permission sets. Define roles once, assign to users. Way easier to manage than individual IAM users.</p>
+
+    <h2>Mistake #4: No MFA on Critical Accounts</h2>
+    
+    <p><strong>What we find:</strong> Root account without MFA. Admin users without MFA. "It's annoying" is the reason.</p>
+    
+    <p><strong>Why it happens:</strong> MFA adds friction. Engineers hate friction. Without enforcement, people skip it.</p>
+    
+    <p><strong>The risk:</strong> Credential stuffing, password reuse, phishing — all defeated by MFA. Without it, a compromised password = account compromise.</p>
+    
+    <h3>The Fix</h3>
+    <ol>
+      <li><strong>Root account:</strong> Hardware MFA key (YubiKey). Stored securely. Used only for emergency.</li>
+      <li><strong>Admin users:</strong> MFA required. Use this IAM policy to enforce:
+        <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Sid": "DenyAllExceptListedIfNoMFA",
+    "Effect": "Deny",
+    "NotAction": [
+      "iam:CreateVirtualMFADevice",
+      "iam:EnableMFADevice",
+      "iam:ListMFADevices",
+      "iam:ListVirtualMFADevices",
+      "iam:ResyncMFADevice",
+      "sts:GetSessionToken"
+    ],
+    "Resource": "*",
+    "Condition": {
+      "BoolIfExists": {"aws:MultiFactorAuthPresent": "false"}
+    }
+  }]
+}</code></pre>
+      </li>
+      <li><strong>All users:</strong> Require MFA for console access. Enforce via SCP at the organization level.</li>
+    </ol>
+
+    <h2>Mistake #5: Public S3 Buckets with Sensitive Data</h2>
+    
+    <p><strong>What we find:</strong> S3 buckets with public access containing customer data, database backups, or application secrets.</p>
+    
+    <p><strong>Why it happens:</strong> Someone needed to share a file. Made the bucket public. Never made it private again. Or: copied a tutorial that had public access for a demo.</p>
+    
+    <p><strong>The risk:</strong> Public S3 buckets are scanned constantly by attackers. If it contains customer data, you have a data breach. If it contains backups or secrets, you have a complete compromise.</p>
+    
+    <h3>The Fix</h3>
+    <ol>
+      <li><strong>Block public access at the account level:</strong>
+        <pre><code>aws s3control put-public-access-block \
+  --account-id 123456789012 \
+  --public-access-block-configuration \
+  "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"</code></pre>
+      </li>
+      <li><strong>Use bucket policies, not ACLs:</strong> ACLs are confusing and error-prone. Disable them:
+        <pre><code>aws s3api put-bucket-ownership-controls \
+  --bucket my-bucket \
+  --ownership-controls Rules=[{ObjectOwnership=BucketOwnerEnforced}]</code></pre>
+      </li>
+      <li><strong>Enable access logging:</strong> Know who's accessing your buckets</li>
+      <li><strong>Use AWS Config rule:</strong> <code>s3-bucket-public-read-prohibited</code> to alert on violations</li>
+    </ol>
+
+    <h2>How to Find These Issues in Your Account</h2>
+    
+    <p>You can find most of these issues with AWS-native tools:</p>
+    
+    <ul>
+      <li><strong>IAM Access Analyzer:</strong> Finds external access to your resources</li>
+      <li><strong>Security Hub:</strong> Runs CIS benchmarks, flags misconfigurations</li>
+      <li><strong>Config Rules:</strong> Continuous compliance monitoring</li>
+      <li><strong>Trusted Advisor:</strong> Basic security checks (more with Business/Enterprise support)</li>
+    </ul>
+    
+    <p>Or, for a comprehensive review with prioritized recommendations, we can do a security audit for you.</p>
+
+    <h2>The Fix Pattern: Layers of Defense</h2>
+    
+    <p>Good IAM security isn't one control — it's layers:</p>
+    
+    <ol>
+      <li><strong>Prevention:</strong> SCPs that block dangerous actions at the organization level</li>
+      <li><strong>Least Privilege:</strong> Roles with minimal permissions for each use case</li>
+      <li><strong>Detection:</strong> CloudTrail + alerting on suspicious activity</li>
+      <li><strong>Response:</strong> Runbooks for compromised credentials</li>
+    </ol>
+    
+    <p>If an attacker gets through one layer, the next layer limits the damage.</p>
+
+  </div>
+</article>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>Worried about your IAM security?<br><span class="grad">Get a free security audit.</span></h2>
+    <p>We'll review your IAM configuration, find the high-risk issues, and give you a prioritized fix list. No obligation.</p>
+    <a href="../index.html#contact" class="btn btn-primary btn-lg">Get Your Free Security Audit</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-legal">
+    <p>© <span id="year">2026</span> Orbucx. All rights reserved.</p>
+    <a href="mailto:hello@orbucx.com">hello@orbucx.com</a>
+  </div>
+</footer>
+
+<script src="../script.js" defer></script>
+</body>
+</html>

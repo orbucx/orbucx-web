@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero-Downtime Kubernetes Migration: The Complete Checklist | Orbucx Blog</title>
+<meta name="description" content="How to migrate to Kubernetes with zero downtime. Our 50-point checklist covers containerization, data migration, traffic cutover, and rollback planning. Based on real migrations.">
+<link rel="canonical" href="https://orbucx.com/blog/zero-downtime-kubernetes-migration-checklist/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://orbucx.com/blog/zero-downtime-kubernetes-migration-checklist/">
+<meta property="og:title" content="Zero-Downtime Kubernetes Migration: The Complete Checklist">
+<meta property="og:description" content="50-point checklist for migrating to Kubernetes without downtime. Containerization, data migration, traffic cutover, rollback planning.">
+<meta property="article:published_time" content="2025-12-10T00:00:00Z">
+<meta property="article:section" content="Kubernetes">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/images/fav32.png">
+<link rel="stylesheet" href="../styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Zero-Downtime Kubernetes Migration: The Complete Checklist",
+  "description": "Comprehensive checklist for migrating to Kubernetes without downtime, covering containerization, data migration, and traffic cutover.",
+  "author": {"@type": "Organization", "name": "Orbucx"},
+  "publisher": {"@type": "Organization", "name": "Orbucx"},
+  "datePublished": "2025-12-10",
+  "dateModified": "2025-12-10"
+}
+</script>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="logo-link"><img src="../assets/images/orbucx-header-logo.png" alt="Orbucx" class="nav-logo" width="140" height="40"></a>
+    <div class="nav-links">
+      <a href="../index.html#services">Services</a>
+      <a href="../tools.html">DevOps Tools</a>
+      <a href="../index.html#blog">Blog</a>
+      <a href="../index.html#contact" class="btn btn-primary btn-sm">Get Your Free Audit</a>
+    </div>
+  </div>
+</nav>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <div class="container">
+    <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">Home</span></a>
+        <meta itemprop="position" content="1">
+      </li>
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html#blog"><span itemprop="name">Blog</span></a>
+        <meta itemprop="position" content="2">
+      </li>
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <span itemprop="name">Zero-Downtime Kubernetes Migration</span>
+        <meta itemprop="position" content="3">
+      </li>
+    </ol>
+  </div>
+</nav>
+
+<article class="blog-article">
+  <header class="blog-header">
+    <div class="container container-narrow">
+      <p class="blog-category">Kubernetes</p>
+      <h1>Zero-Downtime Kubernetes Migration: The Complete Checklist</h1>
+      <p class="blog-meta">
+        <time datetime="2025-12-10">December 10, 2025</time> · 15 min read
+      </p>
+      <p class="blog-intro">We recently migrated a fintech company from VMs to GKE with an 11-minute cutover window. Users didn't notice. This is the checklist we used — 50 items across 7 phases that make the difference between a smooth migration and a 3 AM incident.</p>
+    </div>
+  </header>
+
+  <div class="container container-narrow blog-content">
+    
+    <h2>Why Migrations Fail</h2>
+    
+    <p>Most failed Kubernetes migrations share common causes:</p>
+    <ul>
+      <li><strong>Insufficient rehearsal</strong> — First cutover attempt is the real one</li>
+      <li><strong>Data migration afterthought</strong> — Applications move, but databases don't sync properly</li>
+      <li><strong>No rollback plan</strong> — When things go wrong, there's no quick way back</li>
+      <li><strong>DNS propagation surprise</strong> — TTLs weren't lowered, cutover takes hours instead of minutes</li>
+      <li><strong>Missed dependencies</strong> — That hardcoded IP nobody remembered</li>
+    </ul>
+    
+    <p>This checklist addresses each of these failure modes.</p>
+
+    <h2>Phase 1: Pre-Migration Assessment</h2>
+    
+    <p>Before writing a single Dockerfile, understand what you're migrating.</p>
+    
+    <div class="checklist">
+      <h3>Application Inventory</h3>
+      <ul>
+        <li>☐ List all services with their current infrastructure (VMs, containers, serverless)</li>
+        <li>☐ Document dependencies between services (who calls whom)</li>
+        <li>☐ Identify stateful vs. stateless services</li>
+        <li>☐ Map external dependencies (third-party APIs, SaaS services)</li>
+        <li>☐ Document current resource usage (CPU, memory, disk, network)</li>
+      </ul>
+      
+      <h3>Data Assessment</h3>
+      <ul>
+        <li>☐ Inventory all databases (type, size, replication status)</li>
+        <li>☐ Identify data that must migrate vs. data that stays (logs, caches)</li>
+        <li>☐ Document current backup and recovery procedures</li>
+        <li>☐ Assess database schema compatibility with managed services</li>
+      </ul>
+      
+      <h3>Network Assessment</h3>
+      <ul>
+        <li>☐ Document current DNS configuration and TTLs</li>
+        <li>☐ Map all network paths (internal, external, VPN)</li>
+        <li>☐ Identify firewall rules and security groups</li>
+        <li>☐ List all hardcoded IPs in configuration and code</li>
+      </ul>
+    </div>
+
+    <h2>Phase 2: Kubernetes Cluster Setup</h2>
+    
+    <p>Build your target environment before touching production.</p>
+    
+    <div class="checklist">
+      <h3>Cluster Configuration</h3>
+      <ul>
+        <li>☐ Choose managed Kubernetes (EKS/GKE/AKS) vs. self-managed</li>
+        <li>☐ Configure node pools (instance types, autoscaling limits)</li>
+        <li>☐ Set up cluster networking (VPC CNI, Calico, Cilium)</li>
+        <li>☐ Configure ingress controller (nginx, Traefik, cloud-native ALB/GCLB)</li>
+        <li>☐ Set up cert-manager for TLS certificates</li>
+        <li>☐ Configure cluster autoscaler with appropriate limits</li>
+      </ul>
+      
+      <h3>Security Baseline</h3>
+      <ul>
+        <li>☐ Configure RBAC with least-privilege roles</li>
+        <li>☐ Set up network policies (deny-all default + explicit allows)</li>
+        <li>☐ Configure pod security policies/standards</li>
+        <li>☐ Set up secrets management (External Secrets Operator + Vault/cloud secrets)</li>
+        <li>☐ Enable audit logging</li>
+      </ul>
+      
+      <h3>Observability</h3>
+      <ul>
+        <li>☐ Deploy monitoring stack (Prometheus/Grafana or Datadog)</li>
+        <li>☐ Set up log aggregation (Loki, CloudWatch, etc.)</li>
+        <li>☐ Configure alerting with appropriate thresholds</li>
+        <li>☐ Create dashboards for migration monitoring</li>
+      </ul>
+    </div>
+
+    <h2>Phase 3: Application Containerization</h2>
+    
+    <p>Convert applications to containers with production-ready configurations.</p>
+    
+    <div class="checklist">
+      <h3>Dockerfile Best Practices</h3>
+      <ul>
+        <li>☐ Use multi-stage builds to minimize image size</li>
+        <li>☐ Pin base image versions (no <code>:latest</code>)</li>
+        <li>☐ Run as non-root user</li>
+        <li>☐ Scan images for vulnerabilities (Trivy, Snyk)</li>
+        <li>☐ Build multi-arch images if using Graviton/ARM</li>
+      </ul>
+      
+      <h3>Kubernetes Manifests</h3>
+      <ul>
+        <li>☐ Define resource requests and limits for all containers</li>
+        <li>☐ Configure liveness and readiness probes</li>
+        <li>☐ Set up horizontal pod autoscaling (HPA)</li>
+        <li>☐ Configure pod disruption budgets (PDBs)</li>
+        <li>☐ Use ConfigMaps and Secrets (not hardcoded values)</li>
+        <li>☐ Set appropriate replica counts for HA</li>
+      </ul>
+      
+      <h3>CI/CD Pipeline</h3>
+      <ul>
+        <li>☐ Automated image building on push</li>
+        <li>☐ Image scanning in pipeline</li>
+        <li>☐ Automated deployment to staging</li>
+        <li>☐ Deployment approval gates for production</li>
+      </ul>
+    </div>
+
+    <h2>Phase 4: Data Migration Strategy</h2>
+    
+    <p>The hardest part. Plan this carefully.</p>
+    
+    <div class="checklist">
+      <h3>Database Migration</h3>
+      <ul>
+        <li>☐ Set up database replication from source to target (DMS, native replication)</li>
+        <li>☐ Verify replication lag monitoring</li>
+        <li>☐ Test failover procedure in non-production</li>
+        <li>☐ Plan for schema changes needed for managed services</li>
+        <li>☐ Document connection string changes needed</li>
+      </ul>
+      
+      <h3>File Storage Migration</h3>
+      <ul>
+        <li>☐ Sync files to cloud storage (S3, GCS) if not already there</li>
+        <li>☐ Set up continuous sync for files created during migration window</li>
+        <li>☐ Update application code to use new storage paths</li>
+      </ul>
+      
+      <h3>Cache Strategy</h3>
+      <ul>
+        <li>☐ Plan for cache warming on new infrastructure</li>
+        <li>☐ Or: accept cold cache and plan for increased DB load during cutover</li>
+      </ul>
+    </div>
+
+    <h2>Phase 5: Pre-Cutover Preparation</h2>
+    
+    <p>Everything that needs to happen before the actual migration.</p>
+    
+    <div class="checklist">
+      <h3>DNS Preparation</h3>
+      <ul>
+        <li>☐ Lower DNS TTLs to 60 seconds (do this 48+ hours before cutover)</li>
+        <li>☐ Prepare DNS changes but don't apply them yet</li>
+        <li>☐ Verify DNS propagation monitoring is in place</li>
+      </ul>
+      
+      <h3>Traffic Management</h3>
+      <ul>
+        <li>☐ Set up traffic splitting capability (weighted routing)</li>
+        <li>☐ Configure health checks on new infrastructure</li>
+        <li>☐ Test load balancer failover</li>
+      </ul>
+      
+      <h3>Rehearsals</h3>
+      <ul>
+        <li>☐ Complete full migration rehearsal in staging</li>
+        <li>☐ Time each step of the cutover procedure</li>
+        <li>☐ Practice rollback procedure</li>
+        <li>☐ Do at least 2 full rehearsals before production</li>
+      </ul>
+      
+      <h3>Communication</h3>
+      <ul>
+        <li>☐ Create status page update templates</li>
+        <li>☐ Notify stakeholders of maintenance window (if any)</li>
+        <li>☐ Set up war room communication channel</li>
+        <li>☐ Document escalation contacts</li>
+      </ul>
+    </div>
+
+    <h2>Phase 6: Cutover Execution</h2>
+    
+    <p>The actual migration. This should be boring because you've rehearsed.</p>
+    
+    <div class="checklist">
+      <h3>Pre-Cutover Checks</h3>
+      <ul>
+        <li>☐ Verify all pods are healthy on new cluster</li>
+        <li>☐ Confirm database replication is caught up (lag = 0)</li>
+        <li>☐ Verify monitoring and alerting is active</li>
+        <li>☐ Confirm rollback procedure is ready</li>
+        <li>☐ All team members in war room</li>
+      </ul>
+      
+      <h3>Traffic Cutover</h3>
+      <ul>
+        <li>☐ Start with small traffic percentage (5-10%) to new cluster</li>
+        <li>☐ Monitor error rates and latency</li>
+        <li>☐ Gradually increase traffic (25%, 50%, 75%, 100%)</li>
+        <li>☐ Watch for increased database load as caches warm</li>
+      </ul>
+      
+      <h3>Database Cutover</h3>
+      <ul>
+        <li>☐ Stop writes to old database</li>
+        <li>☐ Verify replication is complete</li>
+        <li>☐ Promote new database as primary</li>
+        <li>☐ Update connection strings</li>
+        <li>☐ Verify writes are going to new database</li>
+      </ul>
+      
+      <h3>Post-Cutover Verification</h3>
+      <ul>
+        <li>☐ Verify all endpoints are responding correctly</li>
+        <li>☐ Check error rates are within normal bounds</li>
+        <li>☐ Verify data integrity (spot checks)</li>
+        <li>☐ Confirm no traffic is going to old infrastructure</li>
+      </ul>
+    </div>
+
+    <h2>Phase 7: Post-Migration</h2>
+    
+    <p>The migration isn't done when traffic moves. These steps complete it.</p>
+    
+    <div class="checklist">
+      <h3>Stabilization</h3>
+      <ul>
+        <li>☐ Keep old infrastructure running for 24-48 hours (rollback safety)</li>
+        <li>☐ Monitor closely for 24 hours</li>
+        <li>☐ Address any issues that emerge under real traffic</li>
+        <li>☐ Tune autoscaling based on real usage patterns</li>
+      </ul>
+      
+      <h3>Cleanup</h3>
+      <ul>
+        <li>☐ Decommission old infrastructure (after bake period)</li>
+        <li>☐ Reset DNS TTLs to normal values</li>
+        <li>☐ Update documentation</li>
+        <li>☐ Archive migration runbooks</li>
+      </ul>
+      
+      <h3>Retrospective</h3>
+      <ul>
+        <li>☐ Document what went well</li>
+        <li>☐ Document what could be improved</li>
+        <li>☐ Update checklist for next migration</li>
+      </ul>
+    </div>
+
+    <h2>Our 11-Minute Cutover: What Made It Work</h2>
+    
+    <p>For the fintech migration mentioned at the start, here's what made the difference:</p>
+    
+    <ol>
+      <li><strong>Three full rehearsals</strong> — By the third, we had the procedure down to 11 minutes</li>
+      <li><strong>Database replication running for 2 weeks</strong> — Zero data to sync at cutover</li>
+      <li><strong>DNS TTLs at 60 seconds for 3 days</strong> — Traffic shifted within 2 minutes</li>
+      <li><strong>Gradual traffic shift</strong> — 5% → 25% → 50% → 100% over 15 minutes</li>
+      <li><strong>Automated health checks</strong> — Traffic automatically shifted back if errors spiked</li>
+    </ol>
+    
+    <p>The 11 minutes was the database cutover window (stop writes, verify sync, promote). Everything else happened with zero downtime.</p>
+
+    <h2>Download the Checklist</h2>
+    
+    <p>Want this checklist in a format you can actually check off? We have it as a Google Sheet you can copy.</p>
+    
+    <p><a href="#contact" class="btn btn-primary">Get the Migration Checklist</a></p>
+
+  </div>
+</article>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>Planning a Kubernetes migration?<br><span class="grad">We can help.</span></h2>
+    <p>Our team has done dozens of zero-downtime migrations. Start with a free assessment to understand your migration path.</p>
+    <a href="../index.html#contact" class="btn btn-primary btn-lg">Get Your Free Migration Assessment</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-legal">
+    <p>© <span id="year">2026</span> Orbucx. All rights reserved.</p>
+    <a href="mailto:hello@orbucx.com">hello@orbucx.com</a>
+  </div>
+</footer>
+
+<script src="../script.js" defer></script>
+</body>
+</html>

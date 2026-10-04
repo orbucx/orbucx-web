@@ -1,0 +1,65 @@
+# Orbucx
+
+> DevOps and cloud consulting for startups and SMBs. Senior engineers only.
+
+## What We Do
+
+Orbucx is a boutique DevOps consultancy offering full-stack cloud engineering services:
+- Infrastructure as Code (Terraform, Pulumi)
+- CI/CD pipeline setup and optimization
+- Kubernetes consulting and migration
+- Cloud cost optimization (FinOps)
+- DevSecOps and compliance (SOC 2, ISO 27001, GDPR)
+- 24/7 incident response and managed operations
+
+## Key Differentiators
+
+- Every project staffed with senior engineers (12+ years experience)
+- Free comprehensive cloud audit to start
+- Fixed-price projects, no hourly surprises
+- Retainers from $3,900/month (less than 1/3 of a full-time hire)
+
+## Results
+
+- 40% cloud cost reduction for a scaling SaaS startup (AWS)
+- 11-minute zero-downtime Kubernetes migration for a fintech
+- Zero critical findings after security overhaul for e-commerce company
+
+## Services (All Clouds: AWS, GCP, Azure)
+
+1. Infrastructure as Code & Provisioning
+2. CI/CD & Automated Delivery Pipelines
+3. Containerization & Orchestration (Kubernetes)
+4. Observability, Monitoring & Alerting
+5. DevSecOps & Compliance
+6. FinOps & Cloud Cost Optimization
+7. Disaster Recovery
+8. Platform Engineering
+9. Cloud Migration
+10. Managed Operations
+11. AI & LLM Infrastructure
+12. 24/7 Incident Response
+
+## Pricing
+
+- Free Cloud Audit: $0 (no obligation)
+- Starter Engagement: from $999 (fixed)
+- Monthly Retainer: from $3,900/month
+- One-time Project: from $6,000 (fixed)
+
+## Areas Served
+
+- United States (New York, San Francisco, Austin, Chicago, Seattle, Boston, Denver, Los Angeles)
+- United Kingdom (London, Manchester, Birmingham, Edinburgh, Bristol)
+- Remote teams worldwide
+
+## Contact
+
+- Website: https://orbucx.com
+- Email: hello@orbucx.com
+- LinkedIn: https://linkedin.com/company/orbucx
+- Twitter/X: https://x.com/orbucx
+
+## Technologies
+
+AWS, Google Cloud Platform (GCP), Microsoft Azure, Kubernetes, Docker, Terraform, Pulumi, GitHub Actions, GitLab CI, Jenkins, ArgoCD, Prometheus, Grafana, Datadog, HashiCorp Vault, Ansible, Helm, Istio, EKS, GKE, AKS, ECS, Fargate, Lambda, CloudFormation

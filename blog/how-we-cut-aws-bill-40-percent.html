@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How We Cut a SaaS Startup's AWS Bill by 40% in 7 Weeks | Orbucx Blog</title>
+<meta name="description" content="Real case study: We reduced a scaling SaaS company's AWS bill from $31k to $18.5k per month. Here's exactly what we did — right-sizing, Graviton, savings plans, and zombie cleanup.">
+<link rel="canonical" href="https://orbucx.com/blog/how-we-cut-aws-bill-40-percent/">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://orbucx.com/blog/how-we-cut-aws-bill-40-percent/">
+<meta property="og:title" content="How We Cut a SaaS Startup's AWS Bill by 40% in 7 Weeks">
+<meta property="og:description" content="Real case study: $31k → $18.5k/month AWS bill. No performance regression. Here's the playbook.">
+<meta property="article:published_time" content="2026-01-15T00:00:00Z">
+<meta property="article:author" content="Orbucx Team">
+<meta property="article:section" content="FinOps">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="Cost Optimization">
+<meta property="article:tag" content="FinOps">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/images/fav32.png">
+<link rel="stylesheet" href="../styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How We Cut a SaaS Startup's AWS Bill by 40% in 7 Weeks",
+  "description": "Real case study on reducing AWS costs from $31k to $18.5k per month through right-sizing, Graviton migration, and savings plans.",
+  "image": "https://orbucx.com/assets/images/blog/aws-cost-reduction.png",
+  "author": {
+    "@type": "Organization",
+    "name": "Orbucx"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Orbucx",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://orbucx.com/assets/images/orbucx-web-logo.png"
+    }
+  },
+  "datePublished": "2026-01-15",
+  "dateModified": "2026-01-15",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://orbucx.com/blog/how-we-cut-aws-bill-40-percent/"
+  }
+}
+</script>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="logo-link"><img src="../assets/images/orbucx-header-logo.png" alt="Orbucx" class="nav-logo" width="140" height="40"></a>
+    <div class="nav-links">
+      <a href="../index.html#services">Services</a>
+      <a href="../tools.html">DevOps Tools</a>
+      <a href="../index.html#blog">Blog</a>
+      <a href="../index.html#contact" class="btn btn-primary btn-sm">Get Your Free Audit</a>
+    </div>
+  </div>
+</nav>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <div class="container">
+    <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">Home</span></a>
+        <meta itemprop="position" content="1">
+      </li>
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html#blog"><span itemprop="name">Blog</span></a>
+        <meta itemprop="position" content="2">
+      </li>
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <span itemprop="name">How We Cut AWS Bill by 40%</span>
+        <meta itemprop="position" content="3">
+      </li>
+    </ol>
+  </div>
+</nav>
+
+<article class="blog-article">
+  <header class="blog-header">
+    <div class="container container-narrow">
+      <p class="blog-category">FinOps</p>
+      <h1>How We Cut a SaaS Startup's AWS Bill by 40% in 7 Weeks</h1>
+      <p class="blog-meta">
+        <time datetime="2026-01-15">January 15, 2026</time> · 12 min read
+      </p>
+      <p class="blog-intro">A Series B SaaS company came to us with a problem: their AWS bill had crept from $18k to $31k per month over 6 months, and they had no idea why. Seven weeks later, we got it down to $18.5k — a 40% reduction — with zero performance impact. Here's exactly what we did.</p>
+    </div>
+  </header>
+
+  <div class="container container-narrow blog-content">
+    
+    <h2>The Starting Point: $31,000/Month and Climbing</h2>
+    
+    <p>When we started the engagement, the client's AWS Cost Explorer looked like a hockey stick going the wrong direction. The company had scaled from 10 to 50 engineers in a year, and cloud costs had scaled faster than revenue.</p>
+    
+    <p>The symptoms were familiar:</p>
+    <ul>
+      <li>Nobody could explain why the bill doubled in 6 months</li>
+      <li>Cost Explorer showed everything, which meant it showed nothing useful</li>
+      <li>Engineers spun up resources but never cleaned them up</li>
+      <li>No tagging strategy, so costs couldn't be attributed to teams</li>
+      <li>Everything ran on-demand — no savings plans, no reserved instances</li>
+    </ul>
+
+    <h2>Phase 1: The Audit (Week 1-2)</h2>
+    
+    <p>Before optimizing anything, we needed to understand where the money was going. We spent two weeks building a complete picture:</p>
+    
+    <h3>What we found:</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Monthly Spend</th>
+          <th>% of Bill</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>EC2 (compute)</td>
+          <td>$14,200</td>
+          <td>46%</td>
+        </tr>
+        <tr>
+          <td>RDS (databases)</td>
+          <td>$6,800</td>
+          <td>22%</td>
+        </tr>
+        <tr>
+          <td>Data Transfer</td>
+          <td>$3,100</td>
+          <td>10%</td>
+        </tr>
+        <tr>
+          <td>S3 + EBS</td>
+          <td>$2,400</td>
+          <td>8%</td>
+        </tr>
+        <tr>
+          <td>NAT Gateways</td>
+          <td>$1,800</td>
+          <td>6%</td>
+        </tr>
+        <tr>
+          <td>Other</td>
+          <td>$2,700</td>
+          <td>8%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>The big insight: <strong>EC2 and RDS alone were 68% of the bill</strong>. If we could optimize compute and databases, everything else was rounding error.</p>
+
+    <h2>Phase 2: The Quick Wins (Week 2-3)</h2>
+    
+    <p>We started with changes that required zero architectural changes — pure cleanup and configuration.</p>
+    
+    <h3>1. Zombie Resource Cleanup: $2,400/month saved</h3>
+    
+    <p>We found:</p>
+    <ul>
+      <li><strong>47 orphaned EBS volumes</strong> — databases that were deleted but volumes weren't</li>
+      <li><strong>12 unused Elastic IPs</strong> — $50/month each for doing nothing</li>
+      <li><strong>3 forgotten development environments</strong> — full copies of production, running 24/7</li>
+      <li><strong>8 idle load balancers</strong> — pointing to nothing</li>
+    </ul>
+    
+    <p>Total cleanup: $2,400/month. No changes to production, no risk, pure waste elimination.</p>
+    
+    <h3>2. Dev/Staging Scheduling: $1,800/month saved</h3>
+    
+    <p>Development and staging environments don't need to run at 3 AM on weekends. We implemented:</p>
+    
+    <pre><code># Lambda function triggered by EventBridge
+# Stops dev instances at 8 PM, starts at 8 AM
+# Weekends: stays off
+
+def lambda_handler(event, context):
+    action = event.get('action')
+    instances = get_tagged_instances('Environment', ['dev', 'staging'])
+    
+    if action == 'stop':
+        ec2.stop_instances(InstanceIds=instances)
+    elif action == 'start':
+        ec2.start_instances(InstanceIds=instances)</code></pre>
+    
+    <p>Running dev/staging 12 hours/day, 5 days/week instead of 24/7 cut those costs by 65%.</p>
+
+    <h3>3. NAT Gateway Optimization: $900/month saved</h3>
+    
+    <p>They had NAT Gateways in every AZ (best practice for HA), but traffic was heavily skewed. 80% of traffic went through one AZ. We:</p>
+    <ul>
+      <li>Kept multi-AZ NAT for production</li>
+      <li>Consolidated dev/staging to single NAT Gateway</li>
+      <li>Set up S3 and DynamoDB VPC endpoints (free data transfer)</li>
+    </ul>
+
+    <h2>Phase 3: Right-Sizing (Week 3-5)</h2>
+    
+    <p>This is where the real savings came from. Most instances were over-provisioned because engineers picked sizes based on "what if" rather than actual usage.</p>
+    
+    <h3>The Right-Sizing Process</h3>
+    
+    <ol>
+      <li><strong>Collect 2 weeks of CloudWatch metrics</strong> — CPU, memory (via CloudWatch agent), network, disk</li>
+      <li><strong>Identify over-provisioned instances</strong> — average utilization < 40% with no spikes above 70%</li>
+      <li><strong>Recommend new sizes</strong> — target 60-70% average utilization</li>
+      <li><strong>Test in staging first</strong> — run for a week, validate performance</li>
+      <li><strong>Rolling production changes</strong> — one service at a time, with rollback plan</li>
+    </ol>
+    
+    <h3>What we changed:</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Before</th>
+          <th>After</th>
+          <th>Monthly Savings</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>API servers (8x)</td>
+          <td>m5.2xlarge</td>
+          <td>m6g.xlarge</td>
+          <td>$1,920</td>
+        </tr>
+        <tr>
+          <td>Worker nodes (6x)</td>
+          <td>c5.2xlarge</td>
+          <td>c6g.xlarge</td>
+          <td>$1,440</td>
+        </tr>
+        <tr>
+          <td>Primary RDS</td>
+          <td>db.r5.2xlarge</td>
+          <td>db.r6g.xlarge</td>
+          <td>$840</td>
+        </tr>
+        <tr>
+          <td>Redis</td>
+          <td>cache.r5.xlarge</td>
+          <td>cache.r6g.large</td>
+          <td>$320</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <p><strong>Total right-sizing savings: $4,520/month</strong></p>
+    
+    <h3>The Graviton Factor</h3>
+    
+    <p>Notice we moved from Intel (m5, c5, r5) to Graviton (m6g, c6g, r6g). Graviton instances are:</p>
+    <ul>
+      <li>~20% cheaper for equivalent performance</li>
+      <li>Often 10-20% faster for the same price</li>
+      <li>ARM-based, so Docker images need multi-arch builds</li>
+    </ul>
+    
+    <p>The migration was straightforward because they were already containerized. We updated their CI/CD to build multi-arch images:</p>
+    
+    <pre><code># GitHub Actions multi-arch build
+- name: Build and push
+  uses: docker/build-push-action@v5
+  with:
+    platforms: linux/amd64,linux/arm64
+    push: true
+    tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}</code></pre>
+
+    <h2>Phase 4: Savings Plans (Week 5-6)</h2>
+    
+    <p>With right-sizing done, we had a stable baseline to commit against. The client had been running 100% on-demand — leaving 30-40% savings on the table.</p>
+    
+    <h3>Our recommendation:</h3>
+    
+    <ul>
+      <li><strong>Compute Savings Plan (1-year, no upfront)</strong>: $8,000/month commitment for ~$5,600 effective cost</li>
+      <li>Covered ~70% of their compute (the predictable portion)</li>
+      <li>Remaining 30% stayed on-demand for flexibility</li>
+    </ul>
+    
+    <p><strong>Monthly savings from Savings Plans: $2,400</strong></p>
+    
+    <p>We recommended 1-year no-upfront plans because:</p>
+    <ul>
+      <li>3-year plans save more but lock you in during rapid growth</li>
+      <li>No-upfront preserves cash for a startup</li>
+      <li>1-year is long enough for meaningful savings, short enough to adjust</li>
+    </ul>
+
+    <h2>Phase 5: Ongoing Optimization (Week 6-7)</h2>
+    
+    <p>The final phase was setting up systems to prevent cost creep:</p>
+    
+    <h3>1. Tagging Policy</h3>
+    <p>Every resource must have:</p>
+    <ul>
+      <li><code>Environment</code>: production, staging, development</li>
+      <li><code>Team</code>: platform, product, data</li>
+      <li><code>Service</code>: api, worker, database</li>
+    </ul>
+    <p>AWS Config rule blocks untagged resource creation.</p>
+    
+    <h3>2. Cost Anomaly Detection</h3>
+    <p>AWS Cost Anomaly Detection alerts when daily spend jumps unexpectedly. Slack notification for anything >$100 above normal.</p>
+    
+    <h3>3. Monthly Cost Reviews</h3>
+    <p>30-minute monthly review with engineering leads. Dashboard shows cost by team, trends, and recommendations.</p>
+
+    <h2>The Results</h2>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Optimization</th>
+          <th>Monthly Savings</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Zombie cleanup</td>
+          <td>$2,400</td>
+        </tr>
+        <tr>
+          <td>Dev/staging scheduling</td>
+          <td>$1,800</td>
+        </tr>
+        <tr>
+          <td>NAT Gateway optimization</td>
+          <td>$900</td>
+        </tr>
+        <tr>
+          <td>Right-sizing + Graviton</td>
+          <td>$4,520</td>
+        </tr>
+        <tr>
+          <td>Savings Plans</td>
+          <td>$2,400</td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td><strong>$12,020</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <p><strong>Final bill: $18,980/month</strong> (down from $31,000)</p>
+    <p><strong>Reduction: 39%</strong></p>
+    <p><strong>Annualized savings: $144,240</strong></p>
+
+    <h2>What We Didn't Do</h2>
+    
+    <p>Some common cost optimization tactics we intentionally skipped:</p>
+    
+    <ul>
+      <li><strong>Spot instances</strong> — Their workloads weren't spot-tolerant yet. Future optimization.</li>
+      <li><strong>Reserved Instances</strong> — Savings Plans are more flexible for a growing company.</li>
+      <li><strong>Architecture changes</strong> — Focused on quick wins first. Serverless migration is a future project.</li>
+    </ul>
+
+    <h2>Lessons Learned</h2>
+    
+    <ol>
+      <li><strong>Start with visibility</strong>. You can't optimize what you can't measure. Tagging and cost allocation come first.</li>
+      <li><strong>Right-size before committing</strong>. Don't buy Savings Plans based on bloated infrastructure.</li>
+      <li><strong>Graviton is free money</strong>. If you're containerized, the migration is straightforward and the savings are real.</li>
+      <li><strong>Zombies multiply</strong>. Without cleanup automation, orphaned resources will come back.</li>
+      <li><strong>Make costs visible</strong>. When teams see their costs, they care about optimization.</li>
+    </ol>
+
+    <h2>Could We Do This for You?</h2>
+    
+    <p>If your AWS bill has been climbing and you're not sure why, we can help. Our free cloud audit includes a cost analysis that identifies quick wins and estimates potential savings.</p>
+    
+    <p><strong>Most clients see 25-45% savings</strong>. The engagement often pays for itself in the first month.</p>
+
+  </div>
+</article>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>Ready to cut your cloud bill?<br><span class="grad">Start with a free cost audit.</span></h2>
+    <p>We'll analyze your AWS/GCP/Azure spend and show you exactly where the savings are. No obligation.</p>
+    <a href="../index.html#contact" class="btn btn-primary btn-lg">Get Your Free Cost Audit</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-legal">
+    <p>© <span id="year">2026</span> Orbucx. All rights reserved.</p>
+    <a href="mailto:hello@orbucx.com">hello@orbucx.com</a>
+  </div>
+</footer>
+
+<script src="../script.js" defer></script>
+</body>
+</html>

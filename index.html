@@ -11,6 +11,30 @@
 <meta property="og:title" content="Orbucx — DevOps &amp; Cloud Consulting Services | Free Cloud Audit">
 <meta property="og:description" content="Every layer of your cloud, handled by senior engineers: deployments, pipelines, security, reliability, and cost. AWS, GCP, Azure, Kubernetes, Terraform.">
 <meta property="og:site_name" content="Orbucx">
+<meta property="og:image" content="https://orbucx.com/assets/images/orbucx-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="en_GB">
+
+<!-- Canonical & Hreflang -->
+<link rel="canonical" href="https://orbucx.com/">
+<link rel="alternate" hreflang="en-us" href="https://orbucx.com/">
+<link rel="alternate" hreflang="en-gb" href="https://orbucx.com/">
+<link rel="alternate" hreflang="x-default" href="https://orbucx.com/">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@orbucx">
+<meta name="twitter:title" content="Orbucx — DevOps & Cloud Consulting | USA & UK">
+<meta name="twitter:description" content="Senior DevOps engineers for startups & SMBs. AWS, Kubernetes, Terraform. 40% avg cost savings. 99.95% uptime. Free cloud audit.">
+<meta name="twitter:image" content="https://orbucx.com/assets/images/orbucx-og.png">
+
+<!-- Additional SEO -->
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="author" content="Orbucx">
+<meta name="keywords" content="devops consulting, cloud consulting, aws consulting, kubernetes consulting, terraform consulting, ci/cd consulting, devops services usa, devops services uk, cloud audit, finops, devsecops">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -21,13 +45,51 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Orbucx",
-  "url": "https://orbucx.com",
-  "email": "hello@orbucx.com",
-  "description": "Full-service cloud & DevOps consultancy: infrastructure as code, CI/CD, Kubernetes, observability, DevSecOps, FinOps, disaster recovery, and platform engineering for startups and SMBs worldwide. Every engagement starts with a comprehensive cloud audit.",
-  "areaServed": "Worldwide",
-  "knowsAbout": ["AWS", "Google Cloud", "Azure", "Kubernetes", "Terraform", "Pulumi", "CI/CD", "DevOps", "DevSecOps", "FinOps", "SRE", "Platform Engineering", "Disaster Recovery"]
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://orbucx.com/#organization",
+      "name": "Orbucx",
+      "url": "https://orbucx.com",
+      "logo": {"@type": "ImageObject", "url": "https://orbucx.com/assets/images/orbucx-web-logo.png"},
+      "email": "hello@orbucx.com",
+      "description": "Full-service DevOps & cloud consulting for startups and SMBs. AWS, GCP, Azure, Kubernetes, Terraform, CI/CD. Senior engineers only.",
+      "areaServed": [{"@type": "Country", "name": "United States"}, {"@type": "Country", "name": "United Kingdom"}, {"@type": "AdministrativeArea", "name": "Worldwide"}],
+      "knowsAbout": ["DevOps", "AWS", "Google Cloud", "Azure", "Kubernetes", "Terraform", "CI/CD", "DevSecOps", "FinOps", "Platform Engineering"],
+      "sameAs": ["https://linkedin.com/company/orbucx", "https://twitter.com/orbucx", "https://github.com/orbucx"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://orbucx.com/#website",
+      "url": "https://orbucx.com",
+      "name": "Orbucx",
+      "publisher": {"@id": "https://orbucx.com/#organization"}
+    },
+    {
+      "@type": "ProfessionalService",
+      "name": "Orbucx DevOps Consulting",
+      "provider": {"@id": "https://orbucx.com/#organization"},
+      "serviceType": "DevOps Consulting",
+      "areaServed": ["United States", "United Kingdom", "Worldwide"],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "DevOps Services",
+        "itemListElement": [
+          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Free Cloud Audit"}, "price": "0", "priceCurrency": "USD"},
+          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Starter Engagement"}, "price": "999", "priceCurrency": "USD"},
+          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Monthly Retainer"}, "price": "3900", "priceCurrency": "USD"}
+        ]
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "What does the free cloud audit include?", "acceptedAnswer": {"@type": "Answer", "text": "A full review of your cloud across five dimensions: infrastructure, CI/CD pipelines, security posture, costs, and reliability. First findings within 24 hours; full report within 5 business days."}},
+        {"@type": "Question", "name": "What's the minimum engagement?", "acceptedAnswer": {"@type": "Answer", "text": "The free audit requires no commitment. Paid engagements begin at $999 for a starter engagement; retainers from $3,900/month."}},
+        {"@type": "Question", "name": "Which clouds do you cover?", "acceptedAnswer": {"@type": "Answer", "text": "AWS, Google Cloud, and Azure as first-class citizens, plus on-prem-to-cloud migrations. Standard toolkit: Terraform, Pulumi, Kubernetes, Docker, GitHub Actions/GitLab CI."}}
+      ]
+    }
+  ]
 }
 </script>
 </head>
@@ -40,7 +102,17 @@
       <span></span><span></span><span></span>
     </button>
     <div class="nav-links" id="navLinks">
-      <a href="#services">Services</a>
+      <div class="nav-dropdown">
+        <a href="#services" class="nav-dropdown-toggle">Services <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></a>
+        <div class="nav-dropdown-menu">
+          <a href="services/infrastructure-as-code.html">Infrastructure as Code</a>
+          <a href="services/cicd-pipelines.html">CI/CD Pipelines</a>
+          <a href="services/kubernetes-consulting.html">Kubernetes</a>
+          <a href="services/finops-cost-optimization.html">FinOps & Cost</a>
+          <a href="services/devsecops-compliance.html">DevSecOps</a>
+          <a href="services/managed-operations.html">Managed Operations</a>
+        </div>
+      </div>
       <div class="nav-dropdown">
         <a href="#" class="nav-dropdown-toggle">DevOps Tools <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></a>
         <div class="nav-dropdown-menu">
@@ -377,27 +449,27 @@
         <div class="blog-thumb blog-thumb-1" aria-hidden="true"></div>
         <div class="blog-body">
           <p class="blog-tag">FinOps</p>
-          <h3>The hidden AWS costs nobody audits</h3>
-          <p>Idle NAT gateways, orphaned snapshots, cross-AZ traffic — where your bill quietly grows.</p>
-          <div class="blog-meta"><span>Jan 2026</span><a href="#" class="blog-more">Read more →</a></div>
+          <h3>How We Cut a SaaS Startup's AWS Bill by 40%</h3>
+          <p>Real case study: $31k to $18.5k/month in 7 weeks. Right-sizing, Graviton, savings plans — the complete playbook.</p>
+          <div class="blog-meta"><span>Jan 2026</span><a href="blog/how-we-cut-aws-bill-40-percent.html" class="blog-more">Read more →</a></div>
         </div>
       </article>
       <article class="card blog-card reveal">
         <div class="blog-thumb blog-thumb-2" aria-hidden="true"></div>
         <div class="blog-body">
           <p class="blog-tag">Kubernetes</p>
-          <h3>Zero-downtime Kubernetes migrations: a practical checklist</h3>
-          <p>The rehearsal steps that make an 11-minute cutover boring — in the best way.</p>
-          <div class="blog-meta"><span>Dec 2025</span><a href="#" class="blog-more">Read more →</a></div>
+          <h3>Zero-Downtime Kubernetes Migration Checklist</h3>
+          <p>50-point checklist from a real 11-minute cutover. Containerization, data migration, traffic shifting, rollback planning.</p>
+          <div class="blog-meta"><span>Dec 2025</span><a href="blog/zero-downtime-kubernetes-migration-checklist.html" class="blog-more">Read more →</a></div>
         </div>
       </article>
       <article class="card blog-card reveal">
         <div class="blog-thumb blog-thumb-3" aria-hidden="true"></div>
         <div class="blog-body">
           <p class="blog-tag">Security</p>
-          <h3>5 IAM mistakes that expose your cloud</h3>
-          <p>Over-permissive roles and forgotten keys — the findings we see in almost every audit.</p>
-          <div class="blog-meta"><span>Nov 2025</span><a href="#" class="blog-more">Read more →</a></div>
+          <h3>5 IAM Mistakes That Expose Your Cloud</h3>
+          <p>Over-permissive roles, forgotten keys, admin everywhere — the findings we see in almost every audit, and how to fix them.</p>
+          <div class="blog-meta"><span>Nov 2025</span><a href="blog/5-iam-mistakes-expose-your-cloud.html" class="blog-more">Read more →</a></div>
         </div>
       </article>
     </div>
