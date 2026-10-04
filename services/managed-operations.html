@@ -43,14 +43,33 @@
 </head>
 <body>
 
-<nav class="nav" id="nav">
+<nav class="nav" id="nav" aria-label="Main navigation">
   <div class="nav-inner">
-    <a href="../index.html" class="logo-link"><img src="../assets/images/orbucx-header-logo.png" alt="Orbucx" class="nav-logo" width="140" height="40"></a>
-    <div class="nav-links">
-      <a href="../index.html#services">Services</a>
-      <a href="../tools.html">DevOps Tools</a>
+    <a href="../index.html" class="logo-link" aria-label="Orbucx home"><img src="../assets/images/orbucx-header-logo.png" alt="Orbucx" class="nav-logo" width="140" height="40"></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <div class="nav-dropdown">
+        <a href="../index.html#services" class="nav-dropdown-toggle">Services <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></a>
+        <div class="nav-dropdown-menu">
+          <a href="../services/infrastructure-as-code.html">Infrastructure as Code</a>
+          <a href="../services/cicd-pipelines.html">CI/CD Pipelines</a>
+          <a href="../services/kubernetes-consulting.html">Kubernetes</a>
+          <a href="../services/finops-cost-optimization.html">FinOps &amp; Cost</a>
+          <a href="../services/devsecops-compliance.html">DevSecOps</a>
+          <a href="../services/managed-operations.html">Managed Operations</a>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <a href="#" class="nav-dropdown-toggle">DevOps Tools <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></a>
+        <div class="nav-dropdown-menu">
+          <a href="../tools.html">Scripts Generator</a>
+        </div>
+      </div>
       <a href="../index.html#blog">Blog</a>
-      <a href="../index.html#contact" class="btn btn-primary btn-sm">Get Your Free Audit</a>
+      <a href="../index.html#faq">FAQ</a>
+      <a href="../index.html#contact" class="btn btn-primary btn-sm">Get Your Free Cloud Audit</a>
     </div>
   </div>
 </nav>
