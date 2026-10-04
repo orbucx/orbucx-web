@@ -379,6 +379,65 @@ a.card-link:hover h3 {
 
 /* ============ Blog ============ */
 .blog-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+
+/* Blog Carousel */
+.blog-carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.blog-carousel {
+  display: flex;
+  gap: var(--s3);
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: var(--s2) 0;
+}
+.blog-carousel::-webkit-scrollbar {
+  display: none;
+}
+.blog-carousel .blog-card {
+  flex: 0 0 300px;
+  min-width: 300px;
+}
+.carousel-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.carousel-btn:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+  transform: scale(1.05);
+}
+.carousel-btn svg {
+  width: 20px;
+  height: 20px;
+}
+@media (max-width: 768px) {
+  .carousel-btn {
+    display: none;
+  }
+  .blog-carousel-wrapper {
+    gap: 0;
+  }
+  .blog-carousel .blog-card {
+    flex: 0 0 85vw;
+    min-width: 85vw;
+  }
+}
 .blog-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
 .blog-thumb { height: 150px; position: relative; }
 .blog-thumb::after {

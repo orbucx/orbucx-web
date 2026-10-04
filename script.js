@@ -106,4 +106,18 @@
   /* Footer year */
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
+
+  /* Blog Carousel */
+  var carousel = document.querySelector(".blog-carousel");
+  var btnLeft = document.querySelector(".carousel-btn-left");
+  var btnRight = document.querySelector(".carousel-btn-right");
+  if (carousel && btnLeft && btnRight) {
+    var scrollAmount = 320;
+    btnLeft.addEventListener("click", function () {
+      carousel.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+    });
+    btnRight.addEventListener("click", function () {
+      carousel.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    });
+  }
 })();

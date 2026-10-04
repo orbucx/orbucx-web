@@ -454,11 +454,13 @@
 <section class="section section-alt" id="blog">
   <div class="container">
     <div class="section-head reveal">
-      <p class="eyebrow">Blog</p>
+      <p class="eyebrow">Blogs</p>
       <h2>Insights from the field</h2>
       <p class="section-sub">Practical notes on cloud, cost, and reliability — written by the engineers doing the work.</p>
     </div>
-    <div class="grid blog-grid">
+    <div class="blog-carousel-wrapper">
+      <button class="carousel-btn carousel-btn-left" aria-label="Scroll left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="blog-carousel">
       <article class="card blog-card reveal">
         <div class="blog-thumb blog-thumb-1" aria-hidden="true"></div>
         <div class="blog-body">
@@ -495,6 +497,8 @@
           <div class="blog-meta"><span>Oct 2026</span><a href="blog/why-your-startup-needs-devops-engineer.html" class="blog-more">Read more →</a></div>
         </div>
       </article>
+      </div>
+      <button class="carousel-btn carousel-btn-right" aria-label="Scroll right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
   </div>
 </section>
