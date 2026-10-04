@@ -216,12 +216,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s3);
   max-width: 880px; margin: 0 auto;
 }
+.stat {
+  text-align: center;
+}
 .stat dt {
   font-family: var(--font-head); font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.6rem);
   font-weight: 700;
   background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .stat dd { color: var(--muted); font-size: 0.88rem; margin-top: 4px; }
+
+/* Stats in service pages (3 columns) */
+.service-hero .stats {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 720px;
+}
 
 /* ============ Trust bar ============ */
 .trustbar { padding: var(--s5) 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
