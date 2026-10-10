@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7R01J9NY0Q"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7R01J9NY0Q');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keyless CI/CD on AWS: Shipping a Fintech Platform with GitHub OIDC | Orbucx</title>
+<meta name="description" content="How we took 11 microservices to a TLS-secured AWS environment with GitHub OIDC, zero long-lived AWS keys, SSH-free deploys and one branch policy across 17 repos.">
+<link rel="canonical" href="https://orbucx.com/blog/keyless-cicd-fintech-platform-aws.html">
+<meta name="keywords" content="github actions oidc aws, keyless ci/cd, aws ecr github actions, assumerolewithwebidentity, oidc sub claim, self-hosted runner deploy, docker compose ec2, devops case study, fintech devops">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://orbucx.com/blog/keyless-cicd-fintech-platform-aws.html">
+<meta property="og:title" content="Shipping a Fintech Trading Platform on AWS: Keyless CI/CD, EC2 and Repo Governance">
+<meta property="og:description" content="How we took 11 microservices to a TLS-secured AWS environment with GitHub OIDC, zero long-lived AWS keys, SSH-free deploys and one branch policy across 17 repos.">
+<meta property="og:image" content="https://orbucx.com/assets/images/blog/keyless-cicd-architecture.png">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Keyless CI/CD on AWS: Shipping a Fintech Platform">
+<meta name="twitter:description" content="11 services, zero long-lived AWS keys, deploys without SSH, and the OIDC bug CloudTrail solved.">
+<meta name="twitter:image" content="https://orbucx.com/assets/images/blog/keyless-cicd-architecture.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/images/fav32.png">
+<link rel="stylesheet" href="../styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Shipping a Fintech Trading Platform on AWS: Keyless CI/CD, EC2 and Repo Governance",
+  "description": "How we took 11 microservices to a TLS-secured AWS environment with GitHub OIDC, zero long-lived AWS keys, SSH-free deploys and one branch policy across 17 repos.",
+  "image": "https://orbucx.com/assets/images/blog/keyless-cicd-architecture.png",
+  "author": {"@type": "Organization", "name": "Orbucx"},
+  "publisher": {"@type": "Organization", "name": "Orbucx", "logo": {"@type": "ImageObject", "url": "https://orbucx.com/assets/images/orbucx-web-logo.png"}},
+  "datePublished": "2026-10-10",
+  "dateModified": "2026-10-10",
+  "mainEntityOfPage": "https://orbucx.com/blog/keyless-cicd-fintech-platform-aws.html",
+  "keywords": ["github actions", "oidc", "aws", "ecr", "ci/cd", "devsecops", "docker compose"]
+}
+</script>
+</head>
+<body>
+
+<nav class="nav" id="nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="../index.html" class="logo-link" aria-label="Orbucx home"><img src="../assets/images/orbucx-header-logo.png" alt="Orbucx" class="nav-logo" width="140" height="40"></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <div class="nav-dropdown">
+        <a href="../index.html#services" class="nav-dropdown-toggle">Services <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></a>
+        <div class="nav-dropdown-menu">
+          <a href="../services/infrastructure-as-code.html">Infrastructure as Code</a>
+          <a href="../services/cicd-pipelines.html">CI/CD Pipelines</a>
+          <a href="../services/kubernetes-consulting.html">Kubernetes</a>
+          <a href="../services/finops-cost-optimization.html">FinOps &amp; Cost</a>
+          <a href="../services/devsecops-compliance.html">DevSecOps</a>
+          <a href="../services/managed-operations.html">Managed Operations</a>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <a href="#" class="nav-dropdown-toggle">DevOps Tools <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></a>
+        <div class="nav-dropdown-menu">
+          <a href="../tools.html">Scripts Generator</a>
+        </div>
+      </div>
+      <a href="../index.html#blog">Blog</a>
+      <a href="../index.html#faq">FAQ</a>
+      <a href="../index.html#contact" class="btn btn-primary btn-sm">Get Your Free Cloud Audit</a>
+    </div>
+  </div>
+</nav>
+
+<article class="blog-article">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <div class="container">
+      <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a itemprop="item" href="../index.html"><span itemprop="name">Home</span></a>
+          <meta itemprop="position" content="1">
+        </li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a itemprop="item" href="../index.html#blog"><span itemprop="name">Blog</span></a>
+          <meta itemprop="position" content="2">
+        </li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <span itemprop="name">Keyless CI/CD for a Fintech Platform on AWS</span>
+          <meta itemprop="position" content="3">
+        </li>
+      </ol>
+    </div>
+  </nav>
+
+  <header class="blog-header">
+    <div class="container container-narrow">
+      <span class="blog-category">CI/CD</span>
+      <h1>Shipping a Fintech Trading Platform on AWS<br><span class="grad">Keyless CI/CD, EC2 and Repo Governance</span></h1>
+      <p class="blog-meta">October 2026 · 16 min read</p>
+      <p class="blog-intro">In about three working days, we took a fintech trading platform from "images in a registry" to a running, TLS-terminated dev environment on AWS: 11 services with keyless CI/CD, 9 services live on EC2, and 17 repositories brought under one branch policy. Not a single long-lived AWS access key was created along the way.</p>
+    </div>
+  </header>
+
+  <div class="blog-content">
+    <div class="container container-narrow">
+
+<p>This post walks through the whole thing: the architecture, the decisions, the commands, and the bugs that cost us the most time. The client stays anonymous, and every account ID, IP and domain below is a placeholder.</p>
+<p><strong>The brief:</strong></p>
+<ul>
+<li><strong>What:</strong> a trading platform made of independent microservices, built as Docker images in GitHub Actions and deployed with a Docker Compose kit the dev team maintains.</li>
+<li><strong>Where:</strong> AWS, one EC2 host for the dev environment, Amazon ECR as the image registry.</li>
+<li><strong>Rules:</strong> no static AWS keys in GitHub or on servers, least-privilege everywhere, no SSH-driven deploys, and a branch model that keeps <code>main</code> releasable.</li>
+</ul>
+<p>If you run GitHub Actions against AWS, deploy containers to a VM, or manage more than a handful of repos, most of this transfers directly.</p>
+<h2>The platform and the starting point</h2>
+<p>The platform is event-driven: services talk over Kafka-compatible topics, keep state in Postgres, cache in Redis, and sit behind a single API edge.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Components</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Edge</td>
+<td>Caddy (automatic TLS), API gateway, real-time WebSocket gateway</td>
+</tr>
+<tr>
+<td>Trading core</td>
+<td>Order management, exchange gateway (active/standby pair), scheduler</td>
+</tr>
+<tr>
+<td>Back office</td>
+<td>Portfolio ledger, reconciliation, identity, notification</td>
+</tr>
+<tr>
+<td>Data</td>
+<td>Postgres 16, Redis 7, Redpanda (Kafka API)</td>
+</tr>
+<tr>
+<td>Delivery</td>
+<td>GitHub Actions, Amazon ECR, self-hosted runner on the host</td>
+</tr>
+</tbody>
+</table>
+<figure style="margin: var(--s4) 0;"><img src="../assets/images/blog/keyless-cicd-architecture.png" alt="Architecture diagram: GitHub service repos assume AWS IAM roles through OIDC and push images to Amazon ECR; the EC2 dev host pulls images with a read-only instance role, a self-hosted runner deploys the kit, and only Caddy faces the internet." width="1520" height="1000" loading="lazy" style="width:100%; height:auto; border:1px solid var(--border); border-radius: var(--r2);"></figure>
+<p>CI gets one-hour credentials from STS and pushes to ECR. The host pulls with a read-only instance role, and only Caddy faces the internet.</p>
+<p>Each service lives in its own repository and maps one-to-one to an ECR repository (<code>&lt;prefix&gt;/&lt;service&gt;</code>). A separate platform repo holds the Compose deployment kit: <code>compose.yaml</code>, env templates, a secrets bootstrap script and helper scripts for deploy, rollback and backup.</p>
+<p>When we picked this up, the service repos already had a CI pipeline: pnpm build, Docker build, Trivy image scanning, and a push-to-ECR step guarded by an <code>if:</code>. What did not exist yet:</p>
+<ol>
+<li>Any way for GitHub to authenticate to AWS.</li>
+<li>A host to run the stack.</li>
+<li>A deploy path that did not involve someone SSH-ing in.</li>
+<li>Consistent repository settings across the org.</li>
+</ol>
+<h2>Part 1: Keyless CI/CD with GitHub OIDC and ECR</h2>
+<p>Every service authenticates to AWS through GitHub's OIDC provider, assuming its own push-only IAM role. No AWS keys are stored in GitHub.</p>
+<p>The old pattern, an IAM user's access key pasted into repository secrets, gives you a credential that never expires, works from anywhere, and is usually over-permissioned. With OIDC, each workflow run gets a short-lived token from GitHub, exchanges it with AWS STS for temporary credentials, and those expire within the hour.</p>
+<h3>One role per service, push-only</h3>
+<p>We chose one IAM role per service rather than one shared CI role. A compromised workflow in one repo can then push only to its own ECR repository.</p>
+<ul>
+<li><strong>Role:</strong> <code>&lt;prefix&gt;-&lt;service&gt;-github-ecr-role</code></li>
+<li><strong>Inline policy:</strong> <code>&lt;prefix&gt;-&lt;service&gt;-ecr-push-policy</code></li>
+<li><strong>Trust:</strong> only GitHub's OIDC provider, only that repo, only the <code>main</code> branch, audience <code>sts.amazonaws.com</code></li>
+</ul>
+<p>The permission policy is the minimum ECR needs for a push:</p>
+<pre><code>{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: &quot;ecr:GetAuthorizationToken&quot;,
+      &quot;Resource&quot;: &quot;*&quot;
+    },
+    {
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: [
+        &quot;ecr:BatchCheckLayerAvailability&quot;,
+        &quot;ecr:InitiateLayerUpload&quot;,
+        &quot;ecr:UploadLayerPart&quot;,
+        &quot;ecr:CompleteLayerUpload&quot;,
+        &quot;ecr:PutImage&quot;
+      ],
+      &quot;Resource&quot;: &quot;arn:aws:ecr:&lt;region&gt;:&lt;account-id&gt;:repository/&lt;prefix&gt;/&lt;service&gt;&quot;
+    }
+  ]
+}
+</code></pre>
+<p><code>GetAuthorizationToken</code> has to be <code>*</code>, because it is not a repository-level action. Everything else is pinned to a single repository ARN. There is no pull, no delete and no lifecycle-policy access.</p>
+<h3>Creating 11 roles without clicking 11 times</h3>
+<p>The roles were created with a bash script run in AWS CloudShell, one service at a time. Only two variables change per run: <code>SERVICE</code> and <code>REPO_ID</code>. Before it creates anything, the script:</p>
+<ol>
+<li>Validates both policy documents as JSON with <code>jq</code>.</li>
+<li>Runs <code>aws accessanalyzer validate-policy</code> on the permission policy and the trust policy.</li>
+<li>Checks that the OIDC provider and the target ECR repository exist.</li>
+<li>Checks that the role does not already exist.</li>
+<li>Runs in <code>DRY_RUN=true</code> mode first and prints exactly what it would create.</li>
+</ol>
+<p>At the end it prints the links you need next: the repo's Actions variables page, its <code>ci.yml</code>, and the Actions tab.</p>
+<p>The workflow side only needs <code>permissions: id-token: write</code> and the official credentials action:</p>
+<pre><code>permissions:
+  id-token: write
+  contents: read
+
+- uses: aws-actions/configure-aws-credentials@v4
+  with:
+    role-to-assume: ${{ vars.AWS_ECR_PUSH_ROLE_ARN }}
+    aws-region: ${{ vars.AWS_REGION }}
+</code></pre>
+<p>We validated the full chain on one service first: role, variables, a push, and the image in ECR. Only then did we roll out to the other ten. That order mattered, because the first service is where both of the bugs below showed up.</p>
+<h2>The two bugs that taught us the most</h2>
+<h3>Bug 1: AssumeRoleWithWebIdentity kept failing, and the policy was "correct"</h3>
+<p>The first run failed with <code>Not authorized to perform sts:AssumeRoleWithWebIdentity</code>. The trust policy matched the textbook format exactly:</p>
+<pre><code>&quot;token.actions.githubusercontent.com:sub&quot;: &quot;repo:&lt;org&gt;/&lt;repo&gt;:ref:refs/heads/main&quot;
+</code></pre>
+<p>Two roles in the same AWS account, belonging to a different GitHub org, worked with that exact pattern. So the problem had to be in the token, not the policy.</p>
+<p>The answer was in CloudTrail. Failed web-identity assumptions are logged with the claims GitHub actually sent:</p>
+<pre><code>aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=AssumeRoleWithWebIdentity \
+  --max-results 5 --query 'Events[].CloudTrailEvent' --output text | jq .
+</code></pre>
+<p>The <code>sub</code> claim did not look like the documentation. This GitHub org had customized its OIDC subject template to include <strong>immutable IDs</strong>:</p>
+<pre><code>repo:&lt;org&gt;@&lt;org-id&gt;/&lt;repo&gt;@&lt;repo-id&gt;:ref:refs/heads/main
+</code></pre>
+<p>This is a sensible hardening choice. A renamed or recreated repo can no longer inherit another repo's trust, because the numeric IDs never change. It also means every trust policy needs the org ID (the same everywhere) and the repo's own numeric ID. You can find that ID in the API response for the repo, or by searching the page source for <code>repository_id</code>. Once the trust condition matched the real claim, the role assumed on the first try.</p>
+<p><strong>Lesson:</strong> when OIDC trust fails, stop editing the policy and read the token. CloudTrail shows you exactly what AWS received.</p>
+<h3>Bug 2: A green pipeline that pushed nothing</h3>
+<p>With auth fixed, the next run went green. There was no new image in ECR.</p>
+<p>The push steps were guarded by <code>if: vars.AWS_ECR_PUSH_ROLE_ARN != ''</code>. The role ARN and region had been saved as repository <strong>Secrets</strong>, not <strong>Variables</strong>. <code>vars.*</code> was empty, the condition was false, and GitHub skipped every push step without an error. A skipped step still counts as success.</p>
+<p>The fix was moving <code>AWS_REGION</code> and <code>AWS_ECR_PUSH_ROLE_ARN</code> to the Variables tab. A role ARN is not a secret anyway: it is useless without a token the trust policy accepts.</p>
+<p><strong>Lesson:</strong> a green run is not proof of delivery. Verify the artifact (<code>aws ecr describe-images</code>), not the checkmark.</p>
+<h2>Part 2: The EC2 host, with no keys on it either</h2>
+<p>The host pulls images through an instance role that can only read from ECR. There is no <code>aws configure</code> and no credentials file on disk.</p>
+<h3>The instance</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Choice</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AMI</td>
+<td>Ubuntu 24.04 LTS</td>
+<td>Long support window, current Docker packages</td>
+</tr>
+<tr>
+<td>Size</td>
+<td><code>t3.large</code>, with <code>t3.xlarge</code> as the step up</td>
+<td>9 services plus Postgres, Redis and Redpanda fit in 8 GB for dev</td>
+</tr>
+<tr>
+<td>Disk</td>
+<td>50–100 GB gp3</td>
+<td>Images, Postgres data, Redpanda log segments</td>
+</tr>
+<tr>
+<td>Network</td>
+<td>Elastic IP, ports 80/443 open, 22 from known IPs only</td>
+<td>Stable DNS target; SSH is for break-glass, not deploys</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>Instance profile with ECR read-only, scoped to <code>&lt;prefix&gt;/*</code></td>
+<td>The host can pull, never push or delete</td>
+</tr>
+</tbody>
+</table>
+<h3>Host preparation</h3>
+<pre><code>sudo timedatectl set-timezone UTC &amp;&amp; sudo timedatectl set-ntp true
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker ubuntu
+docker compose version            # the kit needs &gt;= 2.24
+
+# AWS CLI v2
+curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+unzip -q awscliv2.zip &amp;&amp; sudo ./aws/install
+aws sts get-caller-identity       # must show the instance role, not a user
+</code></pre>
+<p>That last line is the check that matters. If it prints an IAM user, someone left keys on the box.</p>
+<p>The host had previously run nginx and certbot, so we removed both. The kit ships its own Caddy container, which needs ports 80 and 443 to itself and handles Let's Encrypt automatically. DNS for the API hostname was pointed at the Elastic IP <strong>before</strong> the first start, because Caddy requests the certificate on boot and a failed ACME challenge is slow to retry.</p>
+<h3>The deployment kit</h3>
+<p>The platform repo was cloned to <code>/opt/&lt;platform&gt;</code> using a <strong>read-only deploy key</strong>, not a personal token. The kit splits configuration in two:</p>
+<ul>
+<li><code>deploy/.env</code>: non-secret settings such as the AWS account, region, domain, ACME email and image tags.</li>
+<li><code>deploy/env/*.env</code>: one file per service holding generated secrets. These files are created on the host by <code>init-secrets.sh</code> and never committed.</li>
+</ul>
+<p>For this first dev deploy, images were pinned to <strong>commit-SHA tags</strong>, because semantic version tags did not exist yet. A SHA is immutable and maps straight back to a commit, so it is actually a good dev default.</p>
+<h2>Part 3: Deploying without SSH</h2>
+<p>A push to the platform repo deploys itself. A self-hosted GitHub Actions runner on the host syncs the kit into place and leaves the secrets untouched.</p>
+<p>We considered SSH from a GitHub-hosted runner. That means storing a private key in GitHub and opening port 22 to GitHub's IP ranges. A self-hosted runner flips the direction: the host makes an <strong>outbound</strong> HTTPS connection to GitHub and picks up jobs, so no inbound port is needed for deploys.</p>
+<h3>The deploy workflow</h3>
+<p>The runner checks the repo out into its own <code>_work</code> folder. The key design point is that <strong>the checkout is not the live directory</strong>. The workflow rsyncs it into <code>/opt/&lt;platform&gt;</code> and excludes everything that lives only on the host:</p>
+<pre><code>jobs:
+  deploy:
+    runs-on: [self-hosted, &lt;runner-label&gt;]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync kit to live directory
+        run: |
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude 'deploy/.env' \
+            --exclude 'deploy/env/*.env' \
+            ./ /opt/&lt;platform&gt;/
+      - name: Deploy
+        working-directory: /opt/&lt;platform&gt;/deploy
+        run: ./scripts/deploy.sh
+</code></pre>
+<p>Without those excludes, <code>--delete</code> would wipe every generated secret on the first run.</p>
+<h3>Two runner gotchas worth knowing</h3>
+<ul>
+<li><strong><code>runs-on</code> matches labels, not the runner's name.</strong> Our workflow asked for one label while the runner was registered with another. The job sat at "Waiting for a runner to pick up this job" with no error at all.</li>
+<li><strong>Removing a runner in the GitHub UI deletes its local registration.</strong> The service log said the runner no longer existed on the server and cleaned up its config. Re-registering needs a fresh token, and those expire after about an hour. The token's scope (repo or org) must also match the <code>--url</code> you pass, or you get a 404.</li>
+</ul>
+<p>The service log is the first place to look whenever a runner misbehaves: <code>sudo ./svc.sh status</code>, then the newest <code>_diag/Runner_*.log</code>.</p>
+<h2>Part 4: The problems between "docker compose up" and "healthy"</h2>
+<p>None of these are exotic, but each one costs an hour if you have not seen it before.</p>
+<h3>Least-privilege ECR looked broken when it wasn't</h3>
+<p>On the host, <code>aws ecr describe-repositories</code> returned AccessDenied, even though pulls worked. Without <code>--repository-names</code>, that call is evaluated against <code>repository/*</code>, and our policy correctly allowed only <code>repository/&lt;prefix&gt;/*</code>. To test access to a specific repo, use a call scoped to that repo:</p>
+<pre><code>aws ecr describe-images --repository-name &lt;prefix&gt;/&lt;service&gt; \
+  --query 'sort_by(imageDetails,&amp;imagePushedAt)[-1].imageTags' --output text
+</code></pre>
+<p>The temptation is to widen the policy until the error goes away. Don't. Change the test instead.</p>
+<h3>Docker Hub rate limits on third-party images</h3>
+<p>Pulling the Redpanda image anonymously hit HTTP 429. We pulled it once from Docker Hub and re-tagged it locally to the exact reference the Compose file expected. The longer-term fix is to mirror third-party images into ECR with a pull-through cache, so the host only ever talks to one registry.</p>
+<h3>Layering a dev override the way the kit expects</h3>
+<p>Dev needed an extra service: a simulator for the external exchange API. The standard <code>COMPOSE_FILE</code> variable did nothing, because the kit's <code>common.sh</code> passes <code>-f compose.yaml</code> explicitly. Reading the script showed it already supported an optional override variable that appends a second <code>-f compose.dev.yaml</code>. Reading the wrapper first would have saved a round of trial and error.</p>
+<h3><code>restart</code> does not reload env files</h3>
+<p>After editing a service's <code>env/*.env</code>, <code>docker compose restart &lt;svc&gt;</code> restarts the <strong>same</strong> container with the <strong>old</strong> environment. Compose only reads env files when it creates a container:</p>
+<pre><code>docker compose up -d --force-recreate --no-deps &lt;service&gt;
+</code></pre>
+<h3>Two credentials, not one</h3>
+<p>The exchange gateway connects to the external exchange over both REST and a WebSocket feed. It authenticated over REST and then failed on the WebSocket with an auth error, again and again. The exchange issues <strong>separate</strong> logins for the two channels, and we had reused the REST one. Once the WebSocket credentials came through, both channels connected. One gateway instance took the active session and the second held as a hot standby, as designed.</p>
+<h3>Small things that save time on a Compose host</h3>
+<ul>
+<li>Run Compose from the directory that holds the production <code>compose.yaml</code>. The repo-root <code>docker-compose.yml</code> was for local development, and using it on the server starts the wrong stack.</li>
+<li>Load <code>.env</code> into your shell with <code>set -a; . ./.env; set +a</code> so variables like the API domain are available in ad-hoc commands.</li>
+<li><code>docker compose exec -T</code> is for one-shot commands. Leave out <code>-T</code> for an interactive <code>psql</code>, or the session looks frozen with no prompt.</li>
+</ul>
+<h2>Part 5: When secrets leaked, we rotated everything</h2>
+<p>Midway through the deploy, real generated secrets were pasted into a chat tool while we were debugging: a JWT signing key, a TOTP encryption key and database passwords. We treated all of it as compromised and regenerated every secret, not just the ones we could see.</p>
+<p>It was a dev environment with no real users. The temptation is to shrug it off. We didn't, for two reasons. First, habits are set in dev. Second, a JWT signing key is a token-minting key: anyone holding it can forge sessions for any account.</p>
+<p>Because the kit generates secrets instead of having people type them, rotation took minutes:</p>
+<pre><code>cd /opt/&lt;platform&gt;/deploy
+rm env/*.env
+./scripts/init-secrets.sh            # fresh random values for every service
+docker compose up -d --force-recreate
+</code></pre>
+<p>There was one catch. Postgres only applies its password environment variables when it <strong>initialises an empty data directory</strong>. On an existing volume, the database keeps the old passwords. So when you rotate, also update the database role passwords with <code>ALTER ROLE</code>, or reset the volume if the data is disposable. Otherwise the services come up with new passwords against a database that still expects the old ones.</p>
+<p><strong>Lesson:</strong> make secrets generated, not typed, and keep rotation to a single command. Then rotating after an exposure is quick, and you are never tempted to skip it.</p>
+<h2>Part 6: Repo governance across 17 repositories</h2>
+<p>The pipeline is only as trustworthy as the branches it builds from. We standardised all 17 repositories in the org on one branch model and one set of merge rules.</p>
+<h3>The branch model</h3>
+<ul>
+<li><code>dev</code> is the default branch. Day-to-day pull requests target it.</li>
+<li><code>main</code> only changes through a <code>release/&lt;x.y&gt;</code> or <code>hotfix/&lt;topic&gt;</code> pull request, merged with a <strong>merge commit</strong>, so each release is visible as a single point in history.</li>
+<li>Feature pull requests into <code>dev</code> can be squash-merged to keep its history readable.</li>
+</ul>
+<h3>The repository settings that enforce it</h3>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Default branch</td>
+<td><code>dev</code></td>
+<td>New PRs and clones start where work happens</td>
+</tr>
+<tr>
+<td>Allow merge commits</td>
+<td>On</td>
+<td>Required for release and hotfix merges into <code>main</code></td>
+</tr>
+<tr>
+<td>Allow squash merging</td>
+<td>On</td>
+<td>Clean history for feature work</td>
+</tr>
+<tr>
+<td>Allow rebase merging</td>
+<td>Off</td>
+<td>Rebasing rewrites commit SHAs, which breaks traceability for SHA-tagged images</td>
+</tr>
+<tr>
+<td>Automatically delete head branches</td>
+<td>On</td>
+<td>Merged branches don't pile up</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>dev</code> branch has to exist in a repo before you can make it the default. After the switch, scheduled workflows (<code>on: schedule</code>) run from the default branch's copy of the workflow file, so check any repo that has cron jobs. Teammates refresh their clones with <code>git remote set-head origin -a</code>.</p>
+<p>One command checks the result across the whole org:</p>
+<pre><code>gh repo list &lt;org&gt; --limit 100 --json name -q '.[].name' | while read r; do
+  gh api &quot;repos/&lt;org&gt;/$r&quot; -q '&quot;\(.name): default=\(.default_branch) squash=\(.allow_squash_merge) merge=\(.allow_merge_commit) rebase=\(.allow_rebase_merge) autodelete=\(.delete_branch_on_merge)&quot;'
+done
+</code></pre>
+<h3>Recovering <code>main</code> after it was bypassed</h3>
+<p>During the rollout, a series of direct commits landed on the platform repo's <code>main</code>, outside the release process. They removed CI workflow files the deploy depended on. Because <code>main</code> had a clear known-good commit and the bad commits were all after it, we reset the branch:</p>
+<pre><code>git fetch origin
+git reset --hard &lt;last-known-good-sha&gt;
+git push --force origin main
+</code></pre>
+<p>Rewriting a shared branch is a deliberate, last-resort choice. Before you do it, confirm that the commit range you are discarding contains only the bad commits. Consider pushing a backup branch first. Tell everyone who may have pulled. Afterwards, protect <code>main</code> with a ruleset that blocks direct pushes and force pushes, so the next fix can be a reviewed pull request instead.</p>
+<h2>Results</h2>
+<p>After about three working days, every service was healthy behind a valid TLS certificate, both exchange channels were connected, and the first admin account was created on the live stack.</p>
+<table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Services with keyless CI/CD to ECR</td>
+<td>11</td>
+</tr>
+<tr>
+<td>IAM roles, each push-only to one repository</td>
+<td>11</td>
+</tr>
+<tr>
+<td>Long-lived AWS access keys created</td>
+<td>0, in CI and on the host</td>
+</tr>
+<tr>
+<td>Services running on the dev host</td>
+<td>9, plus Postgres, Redis, Redpanda and Caddy</td>
+</tr>
+<tr>
+<td>Repositories on one branch and merge policy</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Inbound ports needed for deploys</td>
+<td>0 (the runner connects outbound)</td>
+</tr>
+<tr>
+<td>Deploy trigger</td>
+<td>One <code>git push</code>; live in a few minutes, with no SSH</td>
+</tr>
+<tr>
+<td>Secret rotation after exposure</td>
+<td>All service secrets, regenerated with one script</td>
+</tr>
+<tr>
+<td>Time from first role to healthy stack</td>
+<td>About 3 working days</td>
+</tr>
+</tbody>
+</table>
+<p>Still open at the time of writing: scheduled database backups (being configured last), semantic version tags in place of commit SHAs, and an ECR pull-through cache for third-party images.</p>
+<h2>What we'd tell anyone doing this next</h2>
+<ol>
+<li><strong>Read the token, not the docs.</strong> When OIDC trust fails, CloudTrail shows the exact <code>sub</code> claim AWS received. Organizations can customise it, and many do.</li>
+<li><strong>Green is not delivered.</strong> Check the artifact in the registry, not the workflow's status. A skipped step counts as a success.</li>
+<li><strong>Variables are config, Secrets are secrets.</strong> A role ARN belongs in <code>vars</code>. A wrong choice can silently disable whole parts of a pipeline.</li>
+<li><strong>Scope the role to the repo, then scope your tests the same way.</strong> When a least-privilege policy "fails" an account-wide API call, it is doing its job.</li>
+<li><strong>Let the host pull and never push.</strong> An instance role with read-only ECR access means a compromised host cannot poison the registry.</li>
+<li><strong>Separate the checkout from the live directory.</strong> Rsync with explicit excludes, so a deploy can never delete the secrets it depends on.</li>
+<li><strong>Make rotation boring.</strong> If regenerating every secret is one command, you will actually do it when it matters.</li>
+<li><strong>Read the wrapper scripts.</strong> A kit's own helper scripts often ignore the standard environment variables and expose their own.</li>
+<li><strong>Governance is part of delivery.</strong> Default branches, merge strategies and protected <code>main</code> decide what your pipeline ships.</li>
+</ol>
+<h2>What's next</h2>
+<p>The dev environment is the template for staging. The next steps are:</p>
+<ul>
+<li>Move the host and its IAM into Terraform, so staging is a variable change rather than a rebuild.</li>
+<li>Replace commit-SHA tags with semantic versions cut from <code>release/*</code> branches.</li>
+<li>Add an ECR pull-through cache for third-party images.</li>
+<li>Ship the scheduled Postgres backups to S3, and test a restore.</li>
+<li>Add monitoring and alerting before real users arrive.</li>
+</ul>
+
+      <h2>Ready to Talk?</h2>
+
+      <p>Need keyless CI/CD, a hardened container deployment or a branch model your pipeline can trust? Every Orbucx engagement starts with a free cloud audit: we tell you what's working, what's not, and what to fix first.</p>
+
+      <p><a href="../index.html#contact" class="btn btn-primary">Get Your Free Cloud Audit</a></p>
+
+    </div>
+  </div>
+</article>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <h2>More from the Blog</h2>
+    </div>
+    <div class="grid blog-grid">
+      <article class="card blog-card">
+        <div class="blog-body">
+          <p class="blog-tag">Security</p>
+          <h3>5 IAM Mistakes That Expose Your Cloud</h3>
+          <p>The findings we see in almost every audit.</p>
+          <a href="5-iam-mistakes-expose-your-cloud.html" class="blog-more">Read more →</a>
+        </div>
+      </article>
+      <article class="card blog-card">
+        <div class="blog-body">
+          <p class="blog-tag">Kubernetes</p>
+          <h3>Zero-Downtime Kubernetes Migration Checklist</h3>
+          <p>50-point checklist from a real 11-minute cutover.</p>
+          <a href="zero-downtime-kubernetes-migration-checklist.html" class="blog-more">Read more →</a>
+        </div>
+      </article>
+      <article class="card blog-card">
+        <div class="blog-body">
+          <p class="blog-tag">Startups</p>
+          <h3>Why Your Startup Needs a DevOps Engineer</h3>
+          <p>Why hiring DevOps early saves money and lets developers ship faster.</p>
+          <a href="why-your-startup-needs-devops-engineer.html" class="blog-more">Read more →</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-legal">
+    <p>© <span id="year">2026</span> Orbucx. All rights reserved.</p>
+    <a href="mailto:hello@orbucx.com">hello@orbucx.com</a>
+  </div>
+</footer>
+
+<script src="../script.js" defer></script>
+</body>
+</html>
